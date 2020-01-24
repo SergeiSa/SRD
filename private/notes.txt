@@ -1,0 +1,6 @@
+Rename PolynomialDataApproximationClass into TPPolynomialDataApproximation
+(TP) stands for Tool Package
+Rename SplineClass into TPSplineConstructor
+Rename UISplineClass into TPSplineConstructorUI
+
+Divide and rename MathClass into TPRotations and TPSimplify
