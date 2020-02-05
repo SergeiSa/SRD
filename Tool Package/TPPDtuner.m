@@ -1,5 +1,5 @@
 %this class tunes PD controller
-classdef PDtuner < handle
+classdef TPPDtuner < handle
     properties
  
         %%%%%%%%%%%%%%%%%%%%%%%
