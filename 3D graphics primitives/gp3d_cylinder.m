@@ -31,6 +31,12 @@ e = [0; 0; 1];
 alpha = acos(dot(n, e));
 a = cross(e, n);
 
+if a == 0
+    a = [0; 1; 0];
+else
+    a = a / norm(a);
+end
+
 axang = [reshape(-a, [1, 3]), alpha];
 T = axang2rotm(axang);
 
