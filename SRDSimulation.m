@@ -421,7 +421,7 @@ classdef SRDSimulation < SRDChain
         
         %This function choses update function according to the preference
         %set by obj.CustomSolverType property
-        function Solver_Update = SolverUpdateIterface(obj)
+        function Solver_Update = SolverUpdateInterface(obj)
 
             switch obj.CustomSolverType
                 case 'Euler'
@@ -572,7 +572,7 @@ classdef SRDSimulation < SRDChain
             %flag showing whether or not the norm of q exceeded the threshold.
             Output.BlowUp = false; 
             
-            Solver_Update = obj.SolverUpdateIterface();
+            Solver_Update = obj.SolverUpdateInterface();
              
             for i = 1:Count
                 t = i*obj.TimeStep;

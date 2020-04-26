@@ -1,5 +1,4 @@
 %This class provides robot model
-%last update 10.12.17
 classdef SRDModelHandler < handle
     properties
         %%%%%%%%%%%
@@ -14,8 +13,6 @@ classdef SRDModelHandler < handle
         %%%%%%%%%%%
         %function handles
         
-        ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController; 
-        %this is a function handle used in computed torque controller
         
         MechanicalEquations_Numeric = [];
         
@@ -28,6 +25,12 @@ classdef SRDModelHandler < handle
         numeric_functions_updated_time = 0;
         numeric_functions_value = [];
         
+        g_dynamics_JSIM = @g_dynamics_JSIM;
+        g_dynamics_RHS = @g_dynamics_RHS;
+        g_dynamics_ControlMap = @g_dynamics_ControlMap;
+        g_dynamics_LagrangeMultiplier_ConstraintJacobian = @g_dynamics_LagrangeMultiplier_ConstraintJacobian;
+        ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController; 
+        %this is a function handle used in computed torque controller
         
     end
     methods
@@ -71,7 +74,7 @@ classdef SRDModelHandler < handle
                 
                 Dynamics.c = 0.5*Dynamics.dH*v - Dynamics.G - Dynamics.Dissipation;
             else
-                Dynamics.H = g_dynamics_JSIM(q);
+                Dynamics.H = obj.g_dynamics_JSIM(q);
                 Dynamics.c = obj.ForcesForComputedTorqueController(q, v);
             end
         end
@@ -80,18 +83,18 @@ classdef SRDModelHandler < handle
         %matrix), only to be used by solvers
         function JSIM = get_actual_JSIM(obj, q)
             if obj.model_type_code == 1
-                JSIM = g_dynamics_JSIM(q);
+                JSIM = obj.g_dynamics_JSIM(q);
             else
-                JSIM = g_dynamics_JSIM(q, obj.theta);
+                JSIM = obj.g_dynamics_JSIM(q, obj.theta);
             end
         end
         %this function provides estimated value of JSIM (joint space inertia
         %matrix)
         function JSIM = get_estimated_JSIM(obj, q)
             if obj.model_type_code == 1
-                JSIM = g_dynamics_JSIM(q);
+                JSIM = obj.g_dynamics_JSIM(q);
             else
-                JSIM = g_dynamics_JSIM(q, obj.estimated_theta);
+                JSIM = obj.g_dynamics_JSIM(q, obj.estimated_theta);
             end
         end        
         
@@ -99,18 +102,18 @@ classdef SRDModelHandler < handle
         %dynamics eq.), only to be used by solvers
         function RHS = get_actual_RHS(obj, q, v, u)
             if obj.model_type_code == 1
-                RHS = g_dynamics_RHS(q, v, u);
+                RHS = obj.g_dynamics_RHS(q, v, u);
             else
-                RHS = g_dynamics_RHS(q, v, u, obj.theta);
+                RHS = obj.g_dynamics_RHS(q, v, u, obj.theta);
             end
         end
         %this function provides estimated value of RHS (right hand side of the
         %dynamics eq.)
         function RHS = get_estimated_RHS(obj, q, v, u)
             if obj.model_type_code == 1
-                RHS = g_dynamics_RHS(q, v, u);
+                RHS = obj.g_dynamics_RHS(q, v, u);
             else
-                RHS = g_dynamics_RHS(q, v, u, obj.estimated_theta);
+                RHS = obj.g_dynamics_RHS(q, v, u, obj.estimated_theta);
             end
         end          
    
@@ -119,18 +122,18 @@ classdef SRDModelHandler < handle
         function ControlMap = get_actual_ControlMap(obj, q)
             switch obj.model_type_code
                 case {1, 3}
-                    ControlMap = g_dynamics_ControlMap(q);
+                    ControlMap = obj.g_dynamics_ControlMap(q);
                 case 2
-                    ControlMap = g_dynamics_ControlMap(q, obj.theta);
+                    ControlMap = obj.g_dynamics_ControlMap(q, obj.theta);
             end
         end
         %this function provides estimated value of ControlMap
         function ControlMap = get_estimated_ControlMap(obj, q)
             switch obj.model_type_code
                 case {1, 3}
-                    ControlMap = g_dynamics_ControlMap(q);
+                    ControlMap = obj.g_dynamics_ControlMap(q);
                 case 2
-                    ControlMap = g_dynamics_ControlMap(q, obj.estimated_theta);
+                    ControlMap = obj.g_dynamics_ControlMap(q, obj.estimated_theta);
             end
         end         
         
@@ -148,18 +151,18 @@ classdef SRDModelHandler < handle
         %dynamics eq.), only to be used by solvers
         function ConstraintJacobian = get_actual_ConstraintJacobian(obj, q)
             if obj.model_type_code == 1
-                ConstraintJacobian = g_dynamics_LagrangeMultiplier_ConstraintJacobian(q);
+                ConstraintJacobian = obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian(q);
             else
-                ConstraintJacobian = g_dynamics_LagrangeMultiplier_ConstraintJacobian(q, obj.theta);
+                ConstraintJacobian = obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian(q, obj.theta);
             end
         end
         %this function provides estimated value of RHS (right hand side of the
         %dynamics eq.)
         function ConstraintJacobian = get_estimated_ConstraintJacobian(obj, q)
             if obj.model_type_code == 1
-                ConstraintJacobian = g_dynamics_LagrangeMultiplier_ConstraintJacobian(q);
+                ConstraintJacobian = obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian(q);
             else
-                ConstraintJacobian = g_dynamics_LagrangeMultiplier_ConstraintJacobian(q, obj.estimated_theta);
+                ConstraintJacobian = obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian(q, obj.estimated_theta);
             end
         end  
         

@@ -406,6 +406,22 @@ classdef SRDuserinterface < handle
             end
         end
         
+        
+        %loads ExternalForcesEngine from a file
+        function ExternalForcesEngine = GetExternalForcesEngine(~)
+            FileName = 'datafile_ExternalForcesEngine.mat';
+            if exist(FileName, 'file') == 2
+                %load created previously InverseKinematicsEngine with the
+                %solved IK problem
+                temp = load(FileName);
+                ExternalForcesEngine = temp.ExternalForcesEngine;
+            else
+                warning(['File ', FileName, ...
+                    ' does not exist. Set up and process the External Forces Engine before using it']);
+                ExternalForcesEngine = [];
+            end
+        end
+        
         %loads AxisLimits from a file
         function AxisLimits = GetAxisLimits(~)
             FileName = 'datafile_AxisLimits.mat';
@@ -454,6 +470,12 @@ classdef SRDuserinterface < handle
         function SaveInitialPosition(~, InitialPosition)
             FileName = 'datafile_InitialPosition.mat';
             save(FileName, 'InitialPosition');
+        end
+        
+        %saves SimulationEngine
+        function SaveExternalForcesEngine(~, ExternalForcesEngine)
+            FileName = 'datafile_ExternalForcesEngine.mat';
+            save(FileName, 'ExternalForcesEngine');
         end
         
     end
