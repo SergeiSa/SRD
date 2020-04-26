@@ -23,16 +23,19 @@ classdef SRDAddExternalForces < handle
         %vars - parameters defining the force (for example, Cartesian
         %components of the force producing the gen. Force.
         %
-        %Use example: (in the symbolic derivation (step 4) routine)
+        %Use example:
             % SymbolicEngine = SRD.GetSymbolicEngine();
             % ExternalForcesEngine = SRDAddExternalForces(SymbolicEngine);
+            % 
             % f = sym('f', [2, 1]);
             % L = SymbolicEngine.RetreaveLinkInLinkArray("Torso");
             % r = L.AbsoluteFollower;
             % J = jacobian(r, SymbolicEngine.q);
             % Force = J'*[f(1); 0; f(2)];
-            % ExternalForcesEngine.AddForce(Force, f); 
-            % SRD.SaveExternalForcesEngine(ExternalForcesEngine);
+            % 
+% ExternalForcesEngine.AddForce(Force, f);
+% 
+% SRD.SaveExternalForcesEngine(ExternalForcesEngine);
         %
         function AddForce(obj, Force, vars)
             timerVal = tic;
@@ -68,22 +71,6 @@ classdef SRDAddExternalForces < handle
         %updates model functions in the SRDModelHandler
         %
         %value - value of parameters vars that are currently acting
-        %
-        % Example: (in the simulation (step 7) routine)
-        %
-        %     function f = GetExternalForces()
-        %         SensorData = SimulationEngine.SensorHandler.ReadCurrentData;
-        %         t = SensorData.t;
-        %         f = [sin(t); 1];
-        %     end
-        %     SimulationEngine.CustomSolverType = 'User-provided';
-        %     function OutputStructure = User_provided_solver()
-        %         f = GetExternalForces();
-        %         ExternalForcesEngine.UpdateModel(f, SimulationEngine.ModelHandler);
-        %         OutputStructure = SimulationEngine.Solver_TaylorUpdate();
-        %     end
-        %     SimulationEngine.User_provided_solver = @User_provided_solver;
-        %
         function UpdateModel(~, value, ModelHandler)
             
             ModelHandler.g_dynamics_RHS = @(q, v, u) g_dynamics_RHS_ext(q, v, u, value);
