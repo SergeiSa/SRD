@@ -278,6 +278,19 @@ classdef SRDLinkWithJoint < SRDLink
             Tz = obj.Math.RotationMatrix3D_z(Input(3));
             
             obj.RelativeOrientation = Tz*Ty*Tx;
+            
+            switch class(Input)
+                case 'sym'
+                    obj.ParentLink.RelativeFollower = sym(obj.ParentLink.RelativeFollower);
+                case 'double'
+                    %obj.ParentLink.RelativeFollower = obj.ParentLink.RelativeFollower;
+                case 'casadi.SX'
+                    import casadi.*
+                    obj.ParentLink.RelativeFollower = SX(obj.ParentLink.RelativeFollower);
+                otherwise
+                    error('invalid type of Input')
+            end
+            
             obj.ParentLink.RelativeFollower(:, obj.ParentFollowerNumber) = [Input(4); Input(5); Input(6)];
             obj.ParentLink.Update();
         end
