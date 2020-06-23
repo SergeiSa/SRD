@@ -193,8 +193,7 @@ classdef SRDMechanicalEquationsManager < SRDMechanicalEquations
         
         function GenerateForwardDynamicsFunctions_Casadi(obj)
             timerVal = tic;
-            import casadi.*
-            
+                
             %generate functions
             disp('Started generating JSIM function');
             g_dynamics_JSIM = Function('g_dynamics_JSIM', {obj.q}, {obj.ForwardDynamicsStructure.JSIM}, {'q'}, {'H'});
@@ -204,23 +203,15 @@ classdef SRDMechanicalEquationsManager < SRDMechanicalEquations
                 {'q', 'v', 'u'}, {'RHS'});
             
             disp('Started generating Control Actions To Gen Motor Torques Map function');
-            g_dynamics_ControlMap = Function('g_dynamics_ControlMap', ...
+            ControlActionsToGenMotorTorquesMap = Function('ControlActionsToGenMotorTorquesMap', ...
                 {obj.q}, {obj.ForwardDynamicsStructure.ControlActionsToGenMotorTorquesMap}, {'q'}, {'B'});
             
             disp('Started generating function for forces for the computed torque controller');
-            g_control_ForcesForComputedTorqueController = Function('g_control_ForcesForComputedTorqueController', ...
-                {obj.q, obj.v}, {obj.ForwardDynamicsStructure.ForcesForComputedTorqueController}, ...
-                {'q', 'v'}, {'c'});
+            g_dynamics_JSIM = Function('g_dynamics_JSIM', {obj.q}, {obj.ForwardDynamicsStructure.ForcesForComputedTorqueController}, ...
+                {'q'}, {'H'});
             
-            
-            CG = CodeGenerator('g_dynamics.c');
-            CG.add(g_dynamics_JSIM);
-            CG.add(g_dynamics_RHS);
-            CG.add(g_dynamics_ControlMap);
-            CG.add(g_control_ForcesForComputedTorqueController);
-            CG.generate();
-            
-            !gcc -fPIC -shared g_dynamics.c -o g_dynamics.so
+            matlabFunction(obj.ForwardDynamicsStructure.ForcesForComputedTorqueController, 'File', ...
+                'g_control_ForcesForComputedTorqueController', 'Vars', {obj.q, obj.v}, 'Optimize', obj.ToOptimizeFunctions); 
             
             toc(timerVal);
         end

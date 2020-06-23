@@ -115,11 +115,14 @@ classdef SRDuserinterface < handle
         end
         
         %This function needs .CreateRobotStructure to have been called.
-        function DeriveEquationsForSimulation(obj, ToLinearize, ToSimplify, dissipation_coefficients)
+        function DeriveEquationsForSimulation(obj, Casadi, ToLinearize, ToSimplify, dissipation_coefficients)
             if nargin < 2
-                ToLinearize = false;
+                Casadi = false;
             end
             if nargin < 3
+                ToLinearize = false;
+            end
+            if nargin < 4
                 ToSimplify = false;
             end
             
@@ -128,7 +131,7 @@ classdef SRDuserinterface < handle
             
             %Create SymbolicEngine that will be used for deriving equations
             if obj.RecreateSymbolicEngine
-                SymbolicEngine = SRDSymbolicEngine(LinkArray);
+                SymbolicEngine = SRDSymbolicEngine(LinkArray, Casadi);
             else
                 SymbolicEngine = obj.GetSymbolicEngine(true);
                 if isempty(SymbolicEngine)
@@ -146,7 +149,7 @@ classdef SRDuserinterface < handle
             end
             
             %This needs to be worked on
-            if nargin < 4
+            if nargin < 5
                 dissipation_coefficients = ones(SymbolicEngine.dof, 1);
             end
             SymbolicEngine.dissipation_coefficients = dissipation_coefficients;
@@ -155,7 +158,11 @@ classdef SRDuserinterface < handle
             %Create dynamics eq. 
             SymbolicEngine.BuildDynamicsEquations(ToSimplify, false);
             %Generate nesessary function from those equations
-            SymbolicEngine.GenerateForwardDynamicsFunctions();
+            if Casadi
+                SymbolicEngine.GenerateForwardDynamicsFunctions_Casadi();
+            else
+                SymbolicEngine.GenerateForwardDynamicsFunctions();
+            end
             
             %If requested generate linearized version of dynamics eq
             if ToLinearize

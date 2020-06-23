@@ -55,8 +55,8 @@ classdef SRDControlEquations < SRDMechanicalEquationsManager
         
         % class constructor
         % initializes properties s and calls the superclass constructor.
-        function obj = SRDControlEquations(LinkArray)
-            obj = obj@SRDMechanicalEquationsManager(LinkArray);
+        function obj = SRDControlEquations(LinkArray, Casadi)
+            obj = obj@SRDMechanicalEquationsManager(LinkArray, Casadi);
             
             obj.s = sym('s', [2*obj.dof, 1]); assume(obj.s, 'real');
         end

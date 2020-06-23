@@ -25,18 +25,47 @@ classdef SRDModelHandler < handle
         numeric_functions_updated_time = 0;
         numeric_functions_value = [];
         
-        g_dynamics_JSIM = @g_dynamics_JSIM;
-        g_dynamics_RHS = @g_dynamics_RHS;
-        g_dynamics_ControlMap = @g_dynamics_ControlMap;
-        g_dynamics_LagrangeMultiplier_ConstraintJacobian = @g_dynamics_LagrangeMultiplier_ConstraintJacobian;
-        ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController; 
-        %this is a function handle used in computed torque controller
+        g_dynamics_JSIM = [];
+        g_dynamics_RHS = [];
+        g_dynamics_ControlMap = [];
+        g_dynamics_LagrangeMultiplier_ConstraintJacobian = [];
+        ForcesForComputedTorqueController = [];
         
+        Casadi = false;
     end
     methods
         
-        function obj = SRDModelHandler()
+        function obj = SRDModelHandler(Casadi)
+            if nargin < 1
+                Casadi = false;
+            end
+            obj.Casadi = Casadi;
             
+            if Casadi
+                import casadi.*
+                
+                g_dynamics_JSIM_C = external('g_dynamics_JSIM', './g_dynamics.so');
+                g_dynamics_RHS_C = external('g_dynamics_RHS', './g_dynamics.so');
+                g_dynamics_ControlMap_C = external('g_dynamics_ControlMap', './g_dynamics.so');
+                %this is a function handle used in computed torque
+                %controller:
+                ForcesForComputedTorqueController_C = external('g_control_ForcesForComputedTorqueController', './g_dynamics.so');
+                warning('obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian not initialized')
+                %obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian = external('g_dynamics_LagrangeMultiplier_ConstraintJacobian', './g_dynamics.so');
+                
+                obj.g_dynamics_JSIM = @(q) full(evalf(g_dynamics_JSIM_C(q)));
+                obj.g_dynamics_RHS = @(q, v, u) full(evalf(g_dynamics_RHS_C(q, v, u)));
+                obj.g_dynamics_ControlMap = @(q) full(evalf(g_dynamics_ControlMap_C(q)));
+                obj.ForcesForComputedTorqueController = @(q, v) full(evalf(ForcesForComputedTorqueController_C(q, v)));
+                
+            else
+                obj.g_dynamics_JSIM = @g_dynamics_JSIM;
+                obj.g_dynamics_RHS = @g_dynamics_RHS;
+                obj.g_dynamics_ControlMap = @g_dynamics_ControlMap;
+                obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian = @g_dynamics_LagrangeMultiplier_ConstraintJacobian;
+                obj.ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController;
+                %this is a function handle used in computed torque controller
+            end
         end
         
         function Setup(obj, MechanicalEquations_Numeric)

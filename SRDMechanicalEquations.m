@@ -142,6 +142,9 @@ classdef SRDMechanicalEquations < SRDChain
         %GetGenExternalForces() and
         %GetExternalForcesParametersToGenExternalForcesMap() will be
         %skipped when building the dynamics eqs.
+        
+        Casadi = false;
+        
     end
     properties (SetObservable)
         
@@ -159,14 +162,25 @@ classdef SRDMechanicalEquations < SRDChain
         % and calls the superclass constructor.
         % it also assignes a valuse to dissipation_coefficients
         % property
-        function obj = SRDMechanicalEquations(LinkArray)
+        function obj = SRDMechanicalEquations(LinkArray, Casadi)
             obj = obj@SRDChain(LinkArray);
             
-            obj.q = sym('q', [obj.dof, 1]); 
-            obj.v = sym('v', [obj.dof, 1]); 
-            obj.a = sym('a', [obj.dof, 1]); 
-            obj.M = sym('M', [3, obj.nob]); 
-            obj.SetAssumptions();
+            obj.Casadi = Casadi;
+            
+            if obj.Casadi
+                import casadi.*
+                
+                obj.q = SX.sym('q', [obj.dof, 1]);
+                obj.v = SX.sym('v', [obj.dof, 1]);
+                obj.a = SX.sym('a', [obj.dof, 1]);
+                obj.M = SX.sym('M', [3, obj.nob]);
+            else
+                obj.q = sym('q', [obj.dof, 1]);
+                obj.v = sym('v', [obj.dof, 1]);
+                obj.a = sym('a', [obj.dof, 1]);
+                obj.M = sym('M', [3, obj.nob]);
+                obj.SetAssumptions();
+            end
             
             obj.dissipation_coefficients = ones(obj.dof, 1);
             obj.Math = MathClass(obj.NumberOfWorkers);
@@ -186,7 +200,16 @@ classdef SRDMechanicalEquations < SRDChain
             % trying to convert symbolic to numerical we need to make
             % sure all matrices are converted to symbolic beforehand
             for i = 1:size(obj.LinkArray, 1)
-                obj.LinkArray(i).RelativeFollower = sym(obj.LinkArray(i).RelativeFollower);
+                switch class(obj.q)
+                    case 'sym'
+                        obj.LinkArray(i).RelativeFollower = sym(obj.LinkArray(i).RelativeFollower);
+                    case 'double'
+                        %obj.LinkArray(i).RelativeFollower = obj.LinkArray(i).RelativeFollower;
+                    case 'casadi.SX'
+                        %obj.LinkArray(i).RelativeFollower = obj.LinkArray(i).RelativeFollower;
+                    otherwise
+                        error('invalid type of q')
+                end
             end
             
             obj.Update(obj.q);
@@ -202,9 +225,19 @@ classdef SRDMechanicalEquations < SRDChain
                     index = index + 1;
                     %here we fill an element of GeometryArray
                     
-                    GeometryStructure.rC = obj.Math.simplify(obj.LinkArray(i).AbsoluteCoM, 'rC');
-                    GeometryStructure.T = obj.Math.simplify(obj.LinkArray(i).AbsoluteOrientation, 'T');
-                    GeometryStructure.J = obj.Math.simplify(jacobian(GeometryStructure.rC, obj.q), 'J');
+                    
+                    GeometryStructure.rC = obj.LinkArray(i).AbsoluteCoM;
+                    GeometryStructure.T = obj.LinkArray(i).AbsoluteOrientation;
+                    
+                    if isa(obj.q, 'sym')
+                        GeometryStructure.rC = obj.Math.simplify(GeometryStructure.rC, 'rC');
+                        GeometryStructure.T  = obj.Math.simplify(GeometryStructure.T,  'T');
+                    end
+                    
+                    GeometryStructure.J = jacobian(GeometryStructure.rC, obj.q);
+                    if isa(obj.q, 'sym')
+                        GeometryStructure.J = obj.Math.simplify(GeometryStructure.J, 'J');
+                    end
                     
                     GeometryStructure.Link = obj.LinkArray(i);
                     
@@ -274,19 +307,26 @@ classdef SRDMechanicalEquations < SRDChain
         % everything, which makes the calculations much longer.
         function w = GetAngularVelocity(obj, T, ToSimplify)
             
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
             %here we find the first derivative of T
             %we do it column by column
-            dT = obj.Math.MatrixDerivative(T, obj.q, obj.v);
+            switch class(obj.q)
+                case 'sym'
+                    dT = obj.Math.MatrixDerivative(T, obj.q, obj.v);
+                    if ToSimplify
+                        disp('Started simplifying derivative of the rotation matrix for a link');
+                        dT = obj.Math.simplify(dT, 'derivative of a rotation matrix');
+                    end
+                case 'casadi.SX'
+                    dT = jacobian(T, obj.q) * obj.v;
+                    dT = reshape(dT, [3, 3]);
+                otherwise
+                    error('invalid type of q')
+            end
 
-            if ToSimplify
-                disp('Started simplifying derivative of the rotation matrix for a link');
-                dT = obj.Math.simplify(dT, 'derivative of a rotation matrix');
-            end     
-            
             % this is the so-called Poisson formula, that defines the
             % relations between the matrix of directional cosines and
             % the angular velocity in a skew-simmetric form (angular
@@ -322,7 +362,7 @@ classdef SRDMechanicalEquations < SRDChain
         % S.Jw - jacobian J1 of the link's CoM; Jw = d(w)/dv
         function OutputArray = PrepareAngularVelocityArray(obj, ToSimplify)
             
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
@@ -352,20 +392,28 @@ classdef SRDMechanicalEquations < SRDChain
         %This function provides a joint space inertia matrix (JSIM)
         %(or generalized inertia matrix)
         %which is the matrix A in manipulator equation:
-        %A*ddq + C - G - F = Q;
+        %H*ddq + C - G - F = Q;
         %where ddq = d^2(q)/dt^2;
-        function A = GetGenInertiaMatrix(obj, ToSimplify)
-            if nargin < 2
+        function H = GetGenInertiaMatrix(obj, ToSimplify)
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             timerVal = tic;
             
-            A = sym(zeros(obj.dof, obj.dof));
+            switch class(obj.q)
+                case 'sym'
+                    H = sym(zeros(obj.dof, obj.dof));
+                case 'casadi.SX'
+                    H = zeros(obj.dof, obj.dof);
+                otherwise
+                    error('invalid type of q')
+            end
+            
             for i = 1:obj.nob
                 GeometryStructure = obj.GeometryArray{i};
                 AngularVelocityStructure = obj.AngularVelocityArray{i};
                 
-                A = A + GeometryStructure.J' * GeometryStructure.Link.Mass * GeometryStructure.J + ...
+                H = H + GeometryStructure.J' * GeometryStructure.Link.Mass * GeometryStructure.J + ...
                     AngularVelocityStructure.Jw' * GeometryStructure.Link.Inertia * AngularVelocityStructure.Jw;
                 
                 disp(['Finished calculating joint space inertia matrix (JSIM) for ''', GeometryStructure.Link.Name, ...
@@ -374,14 +422,14 @@ classdef SRDMechanicalEquations < SRDChain
             
             if ToSimplify
                 disp('Started simplifying joint space inertia matrix (JSIM) of the mechanism');
-                A = obj.Math.simplify(A, 'JSIM');
+                H = obj.Math.simplify(H, 'JSIM');
             end
             elapsedTime = toc(timerVal); disp(['Joint space inertia matrix (JSIM) took ', num2str(elapsedTime), ' seconds to compute']);
         end
         
         %This function provides kinetic energy of the system
         function T = GetKineticEnergy(obj, ToSimplify)
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
@@ -401,14 +449,22 @@ classdef SRDMechanicalEquations < SRDChain
         %A*ddq + C - G - F = Q;
         %where ddq = d^2(q)/dt^2;
         function [C, dJSIM] = GetGenInertialForces(obj, ToSimplify)
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
-            dJSIM = obj.Math.MatrixDerivative(obj.ForwardDynamicsStructure.JSIM, obj.q, obj.v);            
-            if ToSimplify
-                disp('Started simplifying dJSIM');
-                dJSIM = obj.Math.simplify(dJSIM, 'dJSIM');
+            switch class(obj.q)
+                case 'sym'
+                    dJSIM = obj.Math.MatrixDerivative(obj.ForwardDynamicsStructure.JSIM, obj.q, obj.v);
+                    if ToSimplify
+                        disp('Started simplifying dJSIM');
+                        dJSIM = obj.Math.simplify(dJSIM, 'dJSIM');
+                    end
+                case 'casadi.SX'
+                    dJSIM = jacobian(obj.ForwardDynamicsStructure.JSIM, obj.q) * obj.v;
+                    dJSIM = reshape(dJSIM, size(obj.ForwardDynamicsStructure.JSIM));
+                otherwise
+                    error('invalid type of q')
             end
             
             C = 0.5*dJSIM*obj.v;
@@ -428,11 +484,19 @@ classdef SRDMechanicalEquations < SRDChain
         %A*ddq + C - G - F = Q;
         %where ddq = d^2(q)/dt^2;
         function G = GetGenGravitationalForces(obj, ToSimplify)
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
-                        
-            G = sym(zeros(obj.dof, 1));
+                
+            switch class(obj.q)
+                case 'sym'
+                    G = sym(zeros(obj.dof, 1));
+                case 'casadi.SX'
+                    G = zeros(obj.dof, 1);
+                otherwise
+                    error('invalid type of q')
+            end
+            
             for i = 1:obj.nob
                 GeometryStructure = obj.GeometryArray{i};
                   
@@ -465,7 +529,17 @@ classdef SRDMechanicalEquations < SRDChain
         %higher dof joints do not have torque assosiated with them. If
         %needed this can be changed in a subclass.
         function UpdateMotorActionStructure(obj)
-            U = sym('u', [2*obj.dof, 1]); assume(U, 'real');
+            
+            switch class(obj.q)
+                case 'sym'
+                    U = sym('u', [2*obj.dof, 1]); assume(U, 'real');
+                case 'casadi.SX'
+                    import casadi.*
+                    U = SX.sym('u', [2*obj.dof, 1]);
+                otherwise
+                    error('invalid type of q')
+            end
+            
             
             Uindex = 0;
             ForcesIndex = 0;
@@ -495,7 +569,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [U(Uindex); 0; 0];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name]; 
                             case 'pivotY'
@@ -503,7 +577,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; U(Uindex); 0];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name]; 
                             case 'pivotZ'
@@ -511,7 +585,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; 0; U(Uindex)];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name]; 
                             case 'pivotXY'
@@ -546,7 +620,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [U(Uindex); 0; 0];
                                 Force.ExpressedIn = 'absolute coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name];
                             
@@ -555,7 +629,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; U(Uindex); 0];
                                 Force.ExpressedIn = 'absolute coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name]; 
                             
@@ -564,7 +638,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; 0; U(Uindex)];
                                 Force.ExpressedIn = 'absolute coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name]; 
                             
@@ -599,7 +673,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [U(Uindex); 0; 0];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name];      
                             case 'prismaticY'
@@ -607,7 +681,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; U(Uindex); 0];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name];   
                             case 'prismaticZ'
@@ -615,7 +689,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 Force.Parameterized = [0; 0; U(Uindex)];
                                 Force.ExpressedIn = 'relative coordinates';
                                 
-                                ControlActionsList{Uindex} = ['Control action ', char(U(Uindex)), ' corresponds to ', ...
+                                ControlActionsList{Uindex} = ['Control action u #', double(Uindex), ' corresponds to ', ...
                                 obj.GeometryArray{i}.Link.JointType, ' that connects ', obj.GeometryArray{i}.Link.Name, ...
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name];                      
                         end
@@ -657,7 +731,14 @@ classdef SRDMechanicalEquations < SRDChain
             end
             
             %we make sure the obj.u has correct size
-            obj.u = sym('u', [Uindex, 1]); assume(obj.u, 'real');
+            switch class(obj.q)
+                case 'sym'
+                    obj.u = sym('u', [Uindex, 1]); assume(obj.u, 'real');
+                case 'casadi.SX'
+                    obj.u = U(1:Uindex, :);
+                otherwise
+                    error('invalid type of q')
+            end
             
             %save Uindex value to a file
             Control_dof = Uindex; save('datafile_settings_Control_dof', 'Control_dof');
@@ -689,7 +770,7 @@ classdef SRDMechanicalEquations < SRDChain
         %and if it exists and is not empty, the function will calculate
         %maps and jacobians for motor actions too.
         function UpdateExternalAndMotorForcesArray(obj, ToSimplify)
-            if nargin < 3
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
@@ -763,11 +844,19 @@ classdef SRDMechanicalEquations < SRDChain
         %UpdateExternalForcesArray() needs to have been called before
         %GetGenExternalForces()
         function Q = GetGenExternalAndMotorForces(obj, ToSimplify)
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             
-            Q = sym(zeros(obj.dof, 1));
+            switch class(obj.q)
+                case 'sym'
+                    Q = sym(zeros(obj.dof, 1));
+                case 'casadi.SX'
+                    Q = zeros(obj.dof, 1);
+                otherwise
+                    error('invalid type of q')
+            end
+            
             N = max(size(obj.ExternalAndMotorForcesArray));
             for i = 1:N
                 Q = Q + obj.ExternalAndMotorForcesArray{i}.LinearMap * obj.ExternalAndMotorForcesArray{i}.Parameterized;
@@ -787,7 +876,7 @@ classdef SRDMechanicalEquations < SRDChain
         %H*ddq + C - G - F = B*u + Qe;
         %B = dQ/du
         function B = GetControlActionsToGenMotorTorquesMap(obj, ToSimplify)
-            if nargin < 2
+            if (nargin < 2) || (~isa(obj.q, 'sym'))
                 ToSimplify = false; %the default value of ToSimplify
             end
             

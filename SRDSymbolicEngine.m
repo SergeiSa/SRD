@@ -6,8 +6,12 @@ classdef SRDSymbolicEngine < SRDControlEquations
     end
     methods
         % class constructor
-        function obj = SRDSymbolicEngine(LinkArray)
-            obj = obj@SRDControlEquations(LinkArray);
+        function obj = SRDSymbolicEngine(LinkArray, Casadi)
+            if nargin < 2
+                Casadi = false;
+            end
+            
+            obj = obj@SRDControlEquations(LinkArray, Casadi);
         end
     end
 end

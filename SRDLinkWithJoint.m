@@ -211,18 +211,26 @@ classdef SRDLinkWithJoint < SRDLink
         %It uses UsedGenCoordinates property to choose which elements to
         %take
         function Input = GetInputFrom_q(obj, q)
+            
+            import casadi.*
+            
             n = max(size(obj.UsedGenCoordinates, 1), size(obj.UsedGenCoordinates, 2));
             
             %the class can be used for both symbolic and numeric
             %computations
-            if isa(q, 'sym')
-                Input = sym(zeros(n, 1));
-            else
-                Input = zeros(n, 1);
+            switch class(q)
+                case 'sym'
+                    Input = sym(zeros(n, 1));
+                case 'double'
+                    Input = zeros(n, 1);
+                case 'casadi.SX'
+                    Input = SX.zeros(n, 1);
+                otherwise
+                    error('invalid type of q')
             end
             
             for i = 1:n
-                Input(i) = q(abs(obj.UsedGenCoordinates(i)))*sign(obj.UsedGenCoordinates(i));
+                Input(i) = q(abs(obj.UsedGenCoordinates(i))) * sign(obj.UsedGenCoordinates(i));
             end
         end
         
