@@ -19,7 +19,7 @@ classdef SRDLinkWithJoint < SRDLink
         %coordinate is zero.
         
         StaticOrientationMatrix = eye(3);
-        %this matrix SO(3) defines orientation of teh body if
+        %this matrix SO(3) defines orientation of the body if
         %'prismatic_XYZ' joint type is used
         
     end
@@ -59,8 +59,25 @@ classdef SRDLinkWithJoint < SRDLink
         %this is the class constructor, in addition to the parameters needed
         %for the class constructor of LinkClass it requires input value JointType, 
         %which can only take values determined by ValidJointTypes property
-        function obj = SRDLinkWithJoint(JointType, Order, FileName, ParentLink, ParentFollowerNumber)
-            obj@SRDLink(Order, FileName, ParentLink, ParentFollowerNumber);
+        function obj = SRDLinkWithJoint(varargin)
+            if (nargin == 5) && isnumeric(varargin{2})
+                arg = {varargin{2}, varargin{3}, varargin{4}, varargin{5}};
+                JointType = varargin{1};
+            else
+                arg = varargin;
+                
+                Parser = inputParser;
+                Parser.FunctionName = 'SRDLinkWithJoint';
+                Parser.addOptional('JointType', []);
+                Parser.addOptional('Order', []);     %parent parameter
+                Parser.addOptional('FileName', []);  %parent parameter
+                Parser.addOptional('LinkParametersStructure', []); %parent parameter
+                Parser.addOptional('ParentLink', []); %parent parameter
+                Parser.addOptional('ParentFollowerNumber', []); %parent parameter
+                Parser.parse(varargin{:});
+                JointType = Parser.Results.JointType;
+            end
+            obj@SRDLink(arg{:});
             
             switch JointType
                 case obj.ValidJointTypes
@@ -212,8 +229,6 @@ classdef SRDLinkWithJoint < SRDLink
         %take
         function Input = GetInputFrom_q(obj, q)
             
-            import casadi.*
-            
             n = max(size(obj.UsedGenCoordinates, 1), size(obj.UsedGenCoordinates, 2));
             
             %the class can be used for both symbolic and numeric
@@ -224,6 +239,7 @@ classdef SRDLinkWithJoint < SRDLink
                 case 'double'
                     Input = zeros(n, 1);
                 case 'casadi.SX'
+                    import casadi.*
                     Input = SX.zeros(n, 1);
                 otherwise
                     error('invalid type of q')

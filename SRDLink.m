@@ -44,19 +44,64 @@ classdef SRDLink < handle
         
         %Class constructor, requires Order, FileName and ParentLink and (descriptions are above)
         %if Order == 0 you don't need to pass ParentLink
-        function obj = SRDLink(Order, FileName, ParentLink, ParentFollowerNumber)
-            obj.Order = Order;
-            obj.FileName = FileName;
-            
-            %what Order == 0 means is described above     
-            if Order > 0
-                obj.ParentLink = ParentLink;
-                obj.ParentFollowerNumber = ParentFollowerNumber;
+        %function obj = SRDLink(Order, FileName, ParentLink, ParentFollowerNumber)
+        function obj = SRDLink(varargin)
+            %this if-else implements backwards compatibility with the
+            %original SRD robot generation design
+            if (nargin == 4) && isnumeric(varargin{1})
+                obj.Order = varargin{1};
+                obj.FileName = varargin{2};
+                
+                if obj.Order > 0
+                    obj.ParentLink = varargin{3};
+                    obj.ParentFollowerNumber = varargin{4};
+                end
+                
+            else
+                Parser = inputParser;
+                Parser.FunctionName = 'SRDLink';
+                Parser.addOptional('Order', []);
+                Parser.addOptional('FileName', []);
+                Parser.addOptional('LinkParametersStructure', []);
+                Parser.addOptional('ParentLink', []);
+                Parser.addOptional('ParentFollowerNumber', []);
+                Parser.addOptional('JointType', []); %child parameter
+                Parser.parse(varargin{:});
+                
+                %below are checks that all the parameters have been passed
+                if isempty(Parser.Results.Order)
+                    error('Pass Order parameter when creating a Link')
+                else
+                    obj.Order = Parser.Results.Order;
+                end
+                if ~xor(isempty(Parser.Results.FileName), isempty(Parser.Results.LinkParametersStructure))
+                    error('Pass FileName or LinkParametersStructure when creating a Link')
+                end
+                
+                if obj.Order > 0
+                    if isempty(Parser.Results.ParentLink)
+                        error('Pass ParentLink parameter when creating a Link')
+                    else
+                        obj.ParentLink = Parser.Results.ParentLink;
+                    end
+                    if isempty(Parser.Results.ParentFollowerNumber)
+                        error('Pass ParentFollowerNumber parameter when creating a Link')
+                    else
+                        obj.ParentFollowerNumber = Parser.Results.ParentFollowerNumber;
+                    end
+                end
+                
+                obj.FileName = Parser.Results.FileName;              
             end
             
-            %loading a structure from the file, and using it to assign the 
-            %properties of the class
-            Structure = load(FileName);
+            
+            if isempty(obj.FileName)
+                Structure = Parser.Results.LinkParametersStructure;
+            else
+                %loading a structure from the file, and using it to assign the
+                %properties of the class
+                Structure = load(obj.FileName);
+            end
 
             obj.RelativeBase = Structure.RelativeBase;
             obj.RelativeFollower = Structure.RelativeFollower; 
