@@ -16,7 +16,7 @@ classdef SRDChain < handle
         %This is the class constructor. It requires LinkArray - an array of links (objects of 
         %LinkWithJointClass) - as an input;
         function obj = SRDChain(LinkArray)
-           obj.LinkArray = LinkArray;
+            obj.LinkArray = reshape(LinkArray, [], 1);
              
             %here we try to find max value of UsedGenCoordinates property
             %of all links, that should tell us the number of generalized
