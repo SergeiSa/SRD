@@ -694,7 +694,7 @@ classdef SRDMechanicalEquations < SRDChain
                                 ' and ', obj.GeometryArray{i}.Link.ParentLink.Name];                      
                         end
                        
-                    case {'none', 'FloatingBase_6dof', 'planarX', 'planarY', 'planarZ', 'prismatic_XYZ'}
+                    case {'none', 'fixed', 'FloatingBase_6dof', 'planarX', 'planarY', 'planarZ', 'prismatic_XYZ'}
                         Type = 'none';
                     otherwise
                         warning(['Invalid joint type applied to link  ''', obj.GeometryArray{i}.Link.Name, ...

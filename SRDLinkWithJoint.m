@@ -48,7 +48,8 @@ classdef SRDLinkWithJoint < SRDLink
                            'pivotZX'; ...
                            'prismaticX'; ...
                            'prismaticY'; ...
-                           'prismaticZ'};
+                           'prismaticZ'; ...
+                           'fixed'};
     end
     
     properties (Access = private) 
@@ -105,7 +106,7 @@ classdef SRDLinkWithJoint < SRDLink
         %joint type
         function ProperSize = GetJointInputsRequirements(obj)
             switch obj.JointType
-                case 'none'
+                case {'none', 'fixed'}
                     ProperSize = 0;
                 case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX'}
                     ProperSize = 6;
@@ -130,14 +131,10 @@ classdef SRDLinkWithJoint < SRDLink
         function obj = SetUsedGenCoordinates(obj, UsedGenCoordinates)    
             ProperSize = obj.GetJointInputsRequirements();
             
-            if size(UsedGenCoordinates, 1) < size(UsedGenCoordinates, 2)
-                UsedGenCoordinates = UsedGenCoordinates';
-            end
-            
-            if size(UsedGenCoordinates, 1) == ProperSize
-            obj.UsedGenCoordinates = UsedGenCoordinates;
+            if length(UsedGenCoordinates) == ProperSize
+                obj.UsedGenCoordinates = reshape(UsedGenCoordinates, [], 1);
             else
-            warning('This joint type requires input of different dimentions');
+                warning('This joint type requires input of different dimentions');
             end
         end
         
@@ -217,6 +214,8 @@ classdef SRDLinkWithJoint < SRDLink
                     obj.prismaticY(Input);
                 case 'prismaticZ'
                     obj.prismaticZ(Input);
+                case 'fixed'
+                    obj.fixed(Input);
                 otherwise
                     warning('Invalid joint type');
             end              
@@ -229,7 +228,7 @@ classdef SRDLinkWithJoint < SRDLink
         %take
         function Input = GetInputFrom_q(obj, q)
             
-            n = max(size(obj.UsedGenCoordinates, 1), size(obj.UsedGenCoordinates, 2));
+            n = length(obj.UsedGenCoordinates);
             
             %the class can be used for both symbolic and numeric
             %computations
@@ -431,6 +430,17 @@ classdef SRDLinkWithJoint < SRDLink
             obj.ParentLink.RelativeFollower(3, obj.ParentFollowerNumber) = obj.PrizmaticJointZeroPosition(3) + Input;
             obj.ParentLink.Update();
         end
+        
+        %prizmatic joint along Z axis
+        function fixed(obj, ~)
+            if isempty(obj.RelativeOrientation)
+                obj.RelativeOrientation = eye(3);
+            end
+            
+            obj.ParentLink.Update();
+        end
+        
+        
         
     end    
     

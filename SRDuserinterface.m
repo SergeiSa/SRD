@@ -115,23 +115,25 @@ classdef SRDuserinterface < handle
         end
         
         %This function needs .CreateRobotStructure to have been called.
-        function DeriveEquationsForSimulation(obj, Casadi, ToLinearize, ToSimplify, dissipation_coefficients)
-            if nargin < 2
-                Casadi = false;
-            end
-            if nargin < 3
-                ToLinearize = false;
-            end
-            if nargin < 4
-                ToSimplify = false;
-            end
+        %
+        %dissipation_coefficients - pass vector to assign each
+        %individually, a scalar to assign them uniformly, or nothing to
+        %have them all set as 1
+        function DeriveEquationsForSimulation(obj, varargin)
+            Parser = inputParser;
+            Parser.FunctionName = 'DeriveEquationsForSimulation';
+            Parser.addOptional('UseCasadi', false);
+            Parser.addOptional('ToLinearize', false);     
+            Parser.addOptional('ToSimplify', true);  
+            Parser.addOptional('dissipation_coefficients', []); 
+            Parser.parse(varargin{:});
             
             %load created previously LinkArray 
             LinkArray = obj.GetLinkArray;
             
             %Create SymbolicEngine that will be used for deriving equations
             if obj.RecreateSymbolicEngine
-                SymbolicEngine = SRDSymbolicEngine(LinkArray, Casadi);
+                SymbolicEngine = SRDSymbolicEngine(LinkArray, Parser.Results.UseCasadi);
             else
                 SymbolicEngine = obj.GetSymbolicEngine(true);
                 if isempty(SymbolicEngine)
@@ -148,25 +150,31 @@ classdef SRDuserinterface < handle
                 SymbolicEngine.NumberOfWorkers = obj.NumberOfWorkers;
             end
             
-            %This needs to be worked on
-            if nargin < 5
+            %Assignment of the dissipation cefficients
+            if isempty(Parser.Results.dissipation_coefficients)
                 dissipation_coefficients = ones(SymbolicEngine.dof, 1);
+            else
+                if length(Parser.Results.dissipation_coefficients) == 1
+                    dissipation_coefficients = Parser.Results.dissipation_coefficients * ones(SymbolicEngine.dof, 1);
+                else
+                    dissipation_coefficients = Parser.Results.dissipation_coefficients;
+                end
             end
             SymbolicEngine.dissipation_coefficients = dissipation_coefficients;
             SymbolicEngine.ToOptimizeFunctions = obj.ToOptimizeFunctions;
             
             %Create dynamics eq. 
-            SymbolicEngine.BuildDynamicsEquations(ToSimplify, false);
+            SymbolicEngine.BuildDynamicsEquations(Parser.Results.ToSimplify, false);
             %Generate nesessary function from those equations
-            if Casadi
+            if Parser.Results.UseCasadi
                 SymbolicEngine.GenerateForwardDynamicsFunctions_Casadi();
             else
                 SymbolicEngine.GenerateForwardDynamicsFunctions();
             end
             
             %If requested generate linearized version of dynamics eq
-            if ToLinearize
-                SymbolicEngine.DoLinearization(ToSimplify);
+            if Parser.Results.ToLinearize
+                SymbolicEngine.DoLinearization(Parser.Results.ToSimplify);
             end
             %Save SymbolicEngine
             save('datafile_SymbolicEngine', 'SymbolicEngine');
