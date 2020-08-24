@@ -6,7 +6,7 @@
 %sphere_handle = gp3d_sphere(A, 0.2, 'EdgeAlpha', 0, 'FaceColor', [1 0.2 0.1], 'SpecularStrength', 0.3);
 function h = gp3d_sphere(position, radius, varargin)
 Parser = inputParser;
-Parser.FunctionName = 'MyFnc';
+Parser.FunctionName = 'gp3d_sphere';
 Parser.addOptional('EdgeAlpha', 0);
 Parser.addOptional('FaceColor', [1 0.2 1]);
 Parser.addOptional('SpecularStrength', 0.2);

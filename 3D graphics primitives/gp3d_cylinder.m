@@ -6,7 +6,7 @@
 %cylinder_handle = gp3d_cylinder(A, B, 0.2, 'EdgeAlpha', 0, 'FaceColor', [1 0.2 0.1], 'SpecularStrength', 0.3);
 function h = gp3d_cylinder(A, B, radius, varargin)
 Parser = inputParser;
-Parser.FunctionName = 'vis_Cylinder';
+Parser.FunctionName = 'gp3d_cylinder';
 Parser.addOptional('EdgeAlpha', 0);
 Parser.addOptional('FaceColor', [0.3 0.2 1]);
 Parser.addOptional('SpecularStrength', 0.2);
