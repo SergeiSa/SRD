@@ -17,6 +17,11 @@ classdef SRDLinkWithJoint < SRDLink
         %this is only needed for prizmatic joints, it defines where the
         %parent follower for the link should be when the corresponding gen
         %coordinate is zero.
+        PivotZeroOrientation = eye(3);
+        %this is optional for pivit joints, for more seemless connection
+        %with URDF-style robot description. Lets you add a defaught
+        %orientation offset for the link. Same can be achieved by the
+        %choice of the base/follower/CoM vectors.
         
         StaticOrientationMatrix = eye(3);
         %this matrix SO(3) defines orientation of the body if
@@ -252,37 +257,37 @@ classdef SRDLinkWithJoint < SRDLink
         %this function implements pivotX joint - a pivot which axis of rotation 
         %is alined with X axis (in body frame)
         function pivotX(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_x(Input);
+            obj.RelativeOrientation = obj.Math.RotationMatrix3D_x(Input) * obj.PivotZeroOrientation;
         end
         
         %this function implements pivotY joint - a pivot which axis of rotation 
         %is alined with Y axis (in body frame)
         function pivotY(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_y(Input);
+            obj.RelativeOrientation = obj.Math.RotationMatrix3D_y(Input) * obj.PivotZeroOrientation;
         end   
         
         %this function implements pivotZ joint - a pivot which axis of rotation 
         %is alined with Z axis (in body frame) 
         function pivotZ(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_z(Input);
+            obj.RelativeOrientation = obj.Math.RotationMatrix3D_z(Input) * obj.PivotZeroOrientation;
         end  
         
         %this function implements pivotX joint - a pivot which axis of rotation 
         %is alined with X axis (in world frame)
         function abs_pivotX(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_x(Input);
+            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_x(Input) * obj.PivotZeroOrientation;
         end
         
         %this function implements pivotY joint - a pivot which axis of rotation 
         %is alined with Y axis (in world frame)
         function abs_pivotY(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_y(Input);
+            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_y(Input) * obj.PivotZeroOrientation;
         end
         
         %this function implements pivotZ joint - a pivot which axis of rotation 
         %is alined with Z axis (in world frame)
         function abs_pivotZ(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_z(Input);
+            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_z(Input) * obj.PivotZeroOrientation;
         end
         
         
@@ -385,7 +390,7 @@ classdef SRDLinkWithJoint < SRDLink
             Tx = obj.Math.RotationMatrix3D_x(Input(1));
             Ty = obj.Math.RotationMatrix3D_y(Input(2));
             
-            obj.RelativeOrientation = Ty*Tx;
+            obj.RelativeOrientation = Ty*Tx * obj.PivotZeroOrientation;
         end
         
         %this function implements joint that gives rotation around both Y and Z axes 
@@ -393,7 +398,7 @@ classdef SRDLinkWithJoint < SRDLink
             Ty = obj.Math.RotationMatrix3D_y(Input(1));
             Tz = obj.Math.RotationMatrix3D_z(Input(2));
             
-            obj.RelativeOrientation = Tz*Ty;
+            obj.RelativeOrientation = Tz*Ty * obj.PivotZeroOrientation;
         end
         
         %this function implements joint that gives rotation around both Z and X axes 
@@ -401,7 +406,7 @@ classdef SRDLinkWithJoint < SRDLink
             Tz = obj.Math.RotationMatrix3D_z(Input(1));
             Tx = obj.Math.RotationMatrix3D_x(Input(2));
             
-            obj.RelativeOrientation = Tx*Tz;
+            obj.RelativeOrientation = Tx*Tz * obj.PivotZeroOrientation;
         end
         
         %prizmatic joint along X axis

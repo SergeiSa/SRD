@@ -29,7 +29,7 @@ classdef MathClass
         %class constructor
         function obj = MathClass(NumberOfWorkers)
             if nargin < 1
-                obj.NumberOfWorkers = 8;
+                %obj.NumberOfWorkers = 8;
             else
                 obj.NumberOfWorkers = NumberOfWorkers;
             end
