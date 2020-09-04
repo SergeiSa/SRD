@@ -15,8 +15,12 @@ classdef SRDLink < handle
     AbsoluteOrientation = [];   %Orientation of the local RF relative to the ground RF
     AbsoluteFollower = [];      %Position of the Follower in the ground RF 
                                 %(also see description of RelativeFollower)
+<<<<<<< HEAD
     StlPath = "";
     
+=======
+                                
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
     UseAbsoluteCoordinates = false; 
     %if true the Update function will not change the .AbsoluteOrientation
     %property
@@ -36,8 +40,12 @@ classdef SRDLink < handle
     Inertia = [];               %the inertia of the link
                                 
     Name = [];                  %The name of the link
+<<<<<<< HEAD
     
     MeshOrientation = eye(3);
+=======
+
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
     %dynamically added additional parameters
     calculated = [];
     
@@ -131,7 +139,10 @@ classdef SRDLink < handle
                 rBaseToCoM = obj.RelativeCoM - obj.RelativeBase;
 
                 obj.AbsoluteFollower = repmat(obj.AbsoluteBase, 1, size(obj.RelativeFollower, 2)) + obj.AbsoluteOrientation*rBaseToFollower;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
                 obj.AbsoluteCoM = obj.AbsoluteBase + obj.AbsoluteOrientation*rBaseToCoM;     
             else
                 %for the ground link (obj.Order == 0) there is no

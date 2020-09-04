@@ -82,8 +82,11 @@ classdef SRDAnimation < handle
                     h = obj.DrawDefault(q, old_h);
                 case 'Custom'
                     h = obj.DrawCustom(q, old_h);
+<<<<<<< HEAD
 %                 case 'STL'
 %                     h = obj.DrawSTL(q, old_h);
+=======
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
                 otherwise
                     warning('Invalid type');
             end
@@ -95,6 +98,7 @@ classdef SRDAnimation < handle
             h = obj.DrawCurrentPositionDefault(old_h);
         end
         
+<<<<<<< HEAD
         function h = DrawCurrentPositionSTL(obj, old_h)
             if isempty(obj.AnimationFigure)
                 obj.AnimationFigure = figure;
@@ -139,6 +143,8 @@ classdef SRDAnimation < handle
 
         end
         
+=======
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
         %this function draws the current state of the robot SR
         function h = DrawCurrentPositionDefault(obj, old_h)
             if isempty(obj.AnimationFigure)
@@ -183,7 +189,11 @@ classdef SRDAnimation < handle
             end
             
             obj.SimulationEngine.Update(obj.SimulationEngine.IC.q);
+<<<<<<< HEAD
             h = obj.DrawCurrentPositionSTL(old_h);
+=======
+            h = obj.DrawCurrentPositionDefault(old_h);
+>>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
             
             axis equal;
             axis(obj.AxisLimits);
