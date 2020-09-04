@@ -1,32 +1,8 @@
 %This class provides user interface for general SRD functionality. Its
 %purpose is to hide unnesessary details, make end-user code cleaner.
-<<<<<<< HEAD
-%last update 12.04.18
 classdef SRDuserinterface < handle
     properties
         
-        RecreateSymbolicEngine = true;
-        %if true - the DeriveEquationsForSimulation method will create
-        %SymbolicEngine each time it is used; if false, the methid will
-        %attempt to load the engine;
-        
-        UseParallelizedSimplification = [];
-        %If true, the programm will simplify the elements of symbolic 
-        %vector expressions in parallel and it will report the progress
-        
-        NumberOfWorkers = [];
-        %Defines the number of MATLAB workers that will be used in parallel
-        %computing       
-        
-        ToOptimizeFunctions = true;
-        %This property will be used to set the same property of the
-        %SymbolicEngine
-        
-=======
-classdef SRDuserinterface < handle
-    properties
-        
->>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
         AnimateRobot = true;
         %determines if the robot will be animated when appropriate
         
@@ -132,8 +108,6 @@ classdef SRDuserinterface < handle
             Parser.addOptional('ToLinearize', false);     
             Parser.addOptional('ToSimplify', true);  
             Parser.addOptional('dissipation_coefficients', []); 
-<<<<<<< HEAD
-=======
             Parser.addOptional('ToRecreateSymbolicEngine', true);
             %if true - method will create new SymbolicEngine; 
             %if false, the method will attempt to load usiting engine;  
@@ -151,18 +125,13 @@ classdef SRDuserinterface < handle
             %SymbolicEngine
             
             
->>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
             Parser.parse(varargin{:});
             
             %load created previously LinkArray 
             LinkArray = obj.GetLinkArray;
             
             %Create SymbolicEngine that will be used for deriving equations
-<<<<<<< HEAD
-            if obj.RecreateSymbolicEngine
-=======
             if Parser.Results.ToRecreateSymbolicEngine
->>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
                 SymbolicEngine = SRDSymbolicEngine(LinkArray, Parser.Results.UseCasadi);
             else
                 SymbolicEngine = obj.GetSymbolicEngine(true);
@@ -173,27 +142,6 @@ classdef SRDuserinterface < handle
             
             %if UseParallelizedSimplification or NumberOfWorkers properties
             %are defined, pass them to the SymbolicEngine
-<<<<<<< HEAD
-            if ~isempty(obj.UseParallelizedSimplification)
-                SymbolicEngine.UseParallelizedSimplification = obj.UseParallelizedSimplification;
-            end
-            if ~isempty(obj.NumberOfWorkers)
-                SymbolicEngine.NumberOfWorkers = obj.NumberOfWorkers;
-            end
-            
-            %Assignment of the dissipation cefficients
-            if isempty(Parser.Results.dissipation_coefficients)
-                dissipation_coefficients = ones(SymbolicEngine.dof, 1);
-            else
-                if length(Parser.Results.dissipation_coefficients) == 1
-                    dissipation_coefficients = Parser.Results.dissipation_coefficients * ones(SymbolicEngine.dof, 1);
-                else
-                    dissipation_coefficients = Parser.Results.dissipation_coefficients;
-                end
-            end
-            SymbolicEngine.dissipation_coefficients = dissipation_coefficients;
-            SymbolicEngine.ToOptimizeFunctions = obj.ToOptimizeFunctions;
-=======
             SymbolicEngine.UseParallelizedSimplification = Parser.Results.ToUseParallelizedSimplification;
             SymbolicEngine.NumberOfWorkers = Parser.Results.NumberOfWorkers;
             SymbolicEngine.ToOptimizeFunctions = Parser.Results.ToOptimizeFunctions;
@@ -208,7 +156,6 @@ classdef SRDuserinterface < handle
                     SymbolicEngine.dissipation_coefficients = Parser.Results.dissipation_coefficients;
                 end
             end
->>>>>>> 7fb04796941e13e1d2ca78bc11ba923285feaf8d
             
             %Create dynamics eq. 
             SymbolicEngine.BuildDynamicsEquations(Parser.Results.ToSimplify, false);
