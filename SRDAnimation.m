@@ -28,6 +28,10 @@ classdef SRDAnimation < handle
         Animation_Accelerator = 1;
         
         %%%%%%%%%%%%%%%%%%%
+        %%%%Render body frames
+        DrawFrames = false;
+        
+        %%%%%%%%%%%%%%%%%%%
         %%%% Position Sequence
         
         %This property determines the amount of time the 
@@ -83,8 +87,8 @@ classdef SRDAnimation < handle
                 case 'Custom'
                     h = obj.DrawCustom(q, old_h);
 
-%                 case 'STL'
-%                     h = obj.DrawSTL(q, old_h);
+                case 'STL'
+                     h = obj.DrawSTL(q, old_h);
 
                 otherwise
                     warning('Invalid type');
@@ -98,7 +102,7 @@ classdef SRDAnimation < handle
         end
         
 
-        function h = DrawCurrentPositionSTL(obj, old_h)
+        function h = DrawSTL(obj, old_h)
             if isempty(obj.AnimationFigure)
                 obj.AnimationFigure = figure;
             else
@@ -114,37 +118,58 @@ classdef SRDAnimation < handle
             else
                 h = old_h;
             end
+           
             camlight('headlight');
             material('dull');
+            
+            if obj.DrawFrames
+                obj.drawBodyFrames();
+            end
             for i = 1:n
                 if obj.SimulationEngine.LinkArray(i).Order > 0
                     index = index + 1;
                     if isempty(obj.SimulationEngine.LinkArray(i).StlPath)
-                        continue
+                        continue;
                     end
-                        obj.SimulationEngine.LinkArray(i).Name
-                        v=eye(3)/3;
-                        translation = obj.SimulationEngine.LinkArray(i).AbsoluteBase;
-                        v=obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*v'+translation;
-                        v=v';
-                        plot3([translation(1),v(1,1)],[translation(2),v(1,2)],[translation(3),v(1,3)],'r');
-                        plot3([translation(1),v(2,1)],[translation(2),v(2,2)],[translation(3),v(2,3)],'g');
-                        plot3([translation(1),v(3,1)],[translation(2),v(3,2)],[translation(3),v(3,3)],'b');
-                        obj.SimulationEngine.LinkArray(i).Name
+                    
+                    vertices = obj.SimulationEngine.LinkArray(i).Mesh.vertices;
                         
-                    fv = stlread(obj.SimulationEngine.LinkArray(i).StlPath);
-                    fv.vertices=obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*fv.vertices'+obj.SimulationEngine.LinkArray(i).AbsoluteBase;
-                    fv.vertices = fv.vertices';
-                    patch(fv,'FaceColor',       [0.8 0.8 1.0], ...
+                    Polygon = struct();
+                    Polygon.vertices = obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*vertices'...
+                        +obj.SimulationEngine.LinkArray(i).AbsoluteBase;
+                    Polygon.vertices = Polygon.vertices';
+                    
+                    if isempty(old_h)
+                        Polygon.faces = obj.SimulationEngine.LinkArray(i).Mesh.faces;
+                        
+                        h{i} = patch(Polygon,'FaceColor',       [0.8 0.8 1.0], ...
                              'EdgeColor',       'none',        ...
                              'FaceLighting',    'gouraud',     ...
                              'AmbientStrength', 0.15);
+                         
+                    else
+                        h{i}.Vertices = Polygon.vertices;
+                    end
+                    
                 end
             end
 
         end
         
+        function drawBodyFrames(obj)
+            n = size(obj.SimulationEngine.LinkArray, 1);
 
+            for i = 1:n
+                v=eye(3)/3;
+                translation = obj.SimulationEngine.LinkArray(i).AbsoluteBase;
+                v=obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*v'+translation;
+                v=v';
+                plot3([translation(1),v(1,1)],[translation(2),v(1,2)],[translation(3),v(1,3)],'r');
+                plot3([translation(1),v(2,1)],[translation(2),v(2,2)],[translation(3),v(2,3)],'g');
+                plot3([translation(1),v(3,1)],[translation(2),v(3,2)],[translation(3),v(3,3)],'b');
+            end
+        end
+        
         %this function draws the current state of the robot SR
         function h = DrawCurrentPositionDefault(obj, old_h)
             if isempty(obj.AnimationFigure)
@@ -190,8 +215,12 @@ classdef SRDAnimation < handle
             
             obj.SimulationEngine.Update(obj.SimulationEngine.IC.q);
 
-            h = obj.DrawCurrentPositionSTL(old_h);
-            
+            switch obj.DrawType
+                case 'Default'
+                    h = obj.DrawCurrentPositionDefault(old_h);
+                case 'STL'
+                    h = obj.DrawSTL(old_h);
+            end
             axis equal;
             axis(obj.AxisLimits);
             
