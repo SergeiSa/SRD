@@ -130,6 +130,7 @@ classdef SRDAnimation < handle
                         plot3([translation(1),v(1,1)],[translation(2),v(1,2)],[translation(3),v(1,3)],'r');
                         plot3([translation(1),v(2,1)],[translation(2),v(2,2)],[translation(3),v(2,3)],'g');
                         plot3([translation(1),v(3,1)],[translation(2),v(3,2)],[translation(3),v(3,3)],'b');
+                        obj.SimulationEngine.LinkArray(i).Name
                         
                     fv = stlread(obj.SimulationEngine.LinkArray(i).StlPath);
                     fv.vertices=obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*fv.vertices'+obj.SimulationEngine.LinkArray(i).AbsoluteBase;
