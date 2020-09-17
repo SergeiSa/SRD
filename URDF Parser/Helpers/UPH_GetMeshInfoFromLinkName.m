@@ -1,7 +1,7 @@
-%   This function returns absolute path of an STL mesh file for a given 
+%   This function returns absolute path of an STL mesh file and it's scale for a given 
 %   LinkName from URDF (UrdfFilePath) given XML node array (LinkXMLNodes) of all links in URDF 
 
-function result = UPH_GetMeshPathFromLinkName(varargin)
+function [mesh_path,scale] = UPH_GetMeshInfoFromLinkName(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'UPH_GetMeshPathFromLinkName';
     Parser.addOptional('LinkXMLNodes', []);
@@ -29,7 +29,8 @@ function result = UPH_GetMeshPathFromLinkName(varargin)
         error('URDF path does not exist')
     end
     
-    result = '';
+    scale = [1,1,1];
+    mesh_path = '';
     path = '';
     for link_idx=0:LinkXMLNodes.getLength()-1
         link_name = LinkXMLNodes.item(link_idx).getAttribute('name');
@@ -45,6 +46,10 @@ function result = UPH_GetMeshPathFromLinkName(varargin)
 
             if ~isempty(mesh_node)
                 path = mesh_node.getAttribute('filename');
+                if mesh_node.hasAttribute('scale')
+                    scale = mesh_node.getAttribute('scale');
+                    scale = str2num(scale(1));
+                end
                 path = char(path(1));
                 break;
             end
@@ -56,7 +61,7 @@ function result = UPH_GetMeshPathFromLinkName(varargin)
         relative_path = [filepath '/' path];
         absolute_path = fullfile(pwd, relative_path);
         if exist(absolute_path,'file')
-            result = absolute_path;
+            mesh_path = absolute_path;
         end
     end
 end
