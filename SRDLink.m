@@ -17,7 +17,7 @@ classdef SRDLink < handle
                                 %(also see description of RelativeFollower)
 
     StlPath = "";
-    Mesh = struct();
+    Mesh = struct('faces',[],'vertices',[]);
 
     UseAbsoluteCoordinates = false; 
     %if true the Update function will not change the .AbsoluteOrientation
