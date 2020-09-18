@@ -15,7 +15,10 @@ classdef SRDLink < handle
     AbsoluteOrientation = [];   %Orientation of the local RF relative to the ground RF
     AbsoluteFollower = [];      %Position of the Follower in the ground RF 
                                 %(also see description of RelativeFollower)
-                                
+
+    StlPath = "";
+    Mesh = struct('faces',[],'vertices',[]);
+
     UseAbsoluteCoordinates = false; 
     %if true the Update function will not change the .AbsoluteOrientation
     %property

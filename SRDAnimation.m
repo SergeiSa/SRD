@@ -28,6 +28,10 @@ classdef SRDAnimation < handle
         Animation_Accelerator = 1;
         
         %%%%%%%%%%%%%%%%%%%
+        %%%%Render body frames
+        DrawFrames = false;
+        
+        %%%%%%%%%%%%%%%%%%%
         %%%% Position Sequence
         
         %This property determines the amount of time the 
@@ -82,6 +86,10 @@ classdef SRDAnimation < handle
                     h = obj.DrawDefault(q, old_h);
                 case 'Custom'
                     h = obj.DrawCustom(q, old_h);
+
+                case 'STL'
+                     h = obj.DrawSTL(q, old_h);
+
                 otherwise
                     warning('Invalid type');
             end
@@ -91,6 +99,75 @@ classdef SRDAnimation < handle
         function h = DrawDefault(obj, q, old_h)
             obj.SimulationEngine.Update(q);
             h = obj.DrawCurrentPositionDefault(old_h);
+        end
+        
+
+        function h = DrawSTL(obj, old_h)
+            if isempty(obj.AnimationFigure)
+                obj.AnimationFigure = figure;
+            else
+                figure(obj.AnimationFigure);
+            end
+            hold on; grid on;
+            
+            n = size(obj.SimulationEngine.LinkArray, 1);
+            index = 0;
+            
+            if isempty(old_h)
+                h = cell(n, 1);
+            else
+                h = old_h;
+            end
+           
+            camlight('headlight');
+            material('dull');
+            
+            if obj.DrawFrames
+                obj.drawBodyFrames();
+            end
+            for i = 1:n
+                if obj.SimulationEngine.LinkArray(i).Order > 0
+                    index = index + 1;
+                    if isempty(obj.SimulationEngine.LinkArray(i).StlPath)
+                        continue;
+                    end
+                    
+                    vertices = obj.SimulationEngine.LinkArray(i).Mesh.vertices;
+                        
+                    Polygon = struct();
+                    Polygon.vertices = obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*vertices'...
+                        +obj.SimulationEngine.LinkArray(i).AbsoluteBase;
+                    Polygon.vertices = Polygon.vertices';
+                    
+                    if isempty(old_h)
+                        Polygon.faces = obj.SimulationEngine.LinkArray(i).Mesh.faces;
+                        
+                        h{i} = patch(Polygon,'FaceColor',       [0.8 0.8 1.0], ...
+                             'EdgeColor',       'none',        ...
+                             'FaceLighting',    'gouraud',     ...
+                             'AmbientStrength', 0.15);
+                         
+                    else
+                        h{i}.Vertices = Polygon.vertices;
+                    end
+                    
+                end
+            end
+
+        end
+        
+        function drawBodyFrames(obj)
+            n = size(obj.SimulationEngine.LinkArray, 1);
+
+            for i = 1:n
+                v=eye(3)/3;
+                translation = obj.SimulationEngine.LinkArray(i).AbsoluteBase;
+                v=obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*v'+translation;
+                v=v';
+                plot3([translation(1),v(1,1)],[translation(2),v(1,2)],[translation(3),v(1,3)],'r');
+                plot3([translation(1),v(2,1)],[translation(2),v(2,2)],[translation(3),v(2,3)],'g');
+                plot3([translation(1),v(3,1)],[translation(2),v(3,2)],[translation(3),v(3,3)],'b');
+            end
         end
         
         %this function draws the current state of the robot SR
@@ -137,8 +214,13 @@ classdef SRDAnimation < handle
             end
             
             obj.SimulationEngine.Update(obj.SimulationEngine.IC.q);
-            h = obj.DrawCurrentPositionDefault(old_h);
-            
+
+            switch obj.DrawType
+                case 'Default'
+                    h = obj.DrawCurrentPositionDefault(old_h);
+                case 'STL'
+                    h = obj.DrawSTL(old_h);
+            end
             axis equal;
             axis(obj.AxisLimits);
             

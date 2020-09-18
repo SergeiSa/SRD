@@ -51,7 +51,7 @@ classdef SRDuserinterface < handle
         %
         % AxisLimits - defines the limits for the axes
         % ViewAngle - defines the camera view angle
-        function CreateRobotStructure(obj, LinkArray, InitialPosition, AxisLimits, ViewAngle)
+        function CreateRobotStructure(obj, LinkArray, InitialPosition, AxisLimits, ViewAngle,DrawFrames,DrawMeshes)
             
             if nargin < 4
                 AxisLimits = [];
@@ -91,6 +91,10 @@ classdef SRDuserinterface < handle
             if obj.AnimateRobot
                 %Display the initial position of the mechanism
                 Animation = SRDAnimation();
+                Animation.DrawFrames = DrawFrames;
+                if DrawMeshes
+                    Animation.DrawType = 'STL';
+                end
                 Animation.DrawIC();
                 xlabel('x axis'); ylabel('y axis'); zlabel('z axis');
             end

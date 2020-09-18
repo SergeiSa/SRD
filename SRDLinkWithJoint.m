@@ -257,37 +257,37 @@ classdef SRDLinkWithJoint < SRDLink
         %this function implements pivotX joint - a pivot which axis of rotation 
         %is alined with X axis (in body frame)
         function pivotX(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_x(Input) * obj.PivotZeroOrientation;
+            obj.RelativeOrientation =  obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_x(Input);
         end
         
         %this function implements pivotY joint - a pivot which axis of rotation 
         %is alined with Y axis (in body frame)
         function pivotY(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_y(Input) * obj.PivotZeroOrientation;
+            obj.RelativeOrientation =  obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_y(Input);
         end   
         
         %this function implements pivotZ joint - a pivot which axis of rotation 
         %is alined with Z axis (in body frame) 
         function pivotZ(obj, Input)
-            obj.RelativeOrientation = obj.Math.RotationMatrix3D_z(Input) * obj.PivotZeroOrientation;
+            obj.RelativeOrientation = obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_z(Input);
         end  
         
         %this function implements pivotX joint - a pivot which axis of rotation 
         %is alined with X axis (in world frame)
         function abs_pivotX(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_x(Input) * obj.PivotZeroOrientation;
+            obj.AbsoluteOrientation = obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_x(Input);
         end
         
         %this function implements pivotY joint - a pivot which axis of rotation 
         %is alined with Y axis (in world frame)
         function abs_pivotY(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_y(Input) * obj.PivotZeroOrientation;
+            obj.AbsoluteOrientation =  obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_y(Input);
         end
         
         %this function implements pivotZ joint - a pivot which axis of rotation 
         %is alined with Z axis (in world frame)
         function abs_pivotZ(obj, Input)
-            obj.AbsoluteOrientation = obj.Math.RotationMatrix3D_z(Input) * obj.PivotZeroOrientation;
+            obj.AbsoluteOrientation = obj.PivotZeroOrientation*obj.Math.RotationMatrix3D_z(Input);
         end
         
         
@@ -390,7 +390,7 @@ classdef SRDLinkWithJoint < SRDLink
             Tx = obj.Math.RotationMatrix3D_x(Input(1));
             Ty = obj.Math.RotationMatrix3D_y(Input(2));
             
-            obj.RelativeOrientation = Ty*Tx * obj.PivotZeroOrientation;
+            obj.RelativeOrientation = obj.PivotZeroOrientation*Ty*Tx ;
         end
         
         %this function implements joint that gives rotation around both Y and Z axes 
@@ -398,7 +398,7 @@ classdef SRDLinkWithJoint < SRDLink
             Ty = obj.Math.RotationMatrix3D_y(Input(1));
             Tz = obj.Math.RotationMatrix3D_z(Input(2));
             
-            obj.RelativeOrientation = Tz*Ty * obj.PivotZeroOrientation;
+            obj.RelativeOrientation = obj.PivotZeroOrientation*Tz*Ty;
         end
         
         %this function implements joint that gives rotation around both Z and X axes 
@@ -406,7 +406,7 @@ classdef SRDLinkWithJoint < SRDLink
             Tz = obj.Math.RotationMatrix3D_z(Input(1));
             Tx = obj.Math.RotationMatrix3D_x(Input(2));
             
-            obj.RelativeOrientation = Tx*Tz * obj.PivotZeroOrientation;
+            obj.RelativeOrientation = obj.PivotZeroOrientation*Tx*Tz;
         end
         
         %prizmatic joint along X axis
