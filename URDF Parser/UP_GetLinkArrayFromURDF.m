@@ -6,11 +6,9 @@ function result = UP_GetLinkArrayFromURDF(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'UP_GetLinkArrayFromURDF';
     Parser.addOptional('UrdfFilePath', []);
-    Parser.addOptional('ParseSTL', []);
+    Parser.addOptional('ParseSTL', false);
     Parser.parse(varargin{:});
-    
-    ParseSTL = false;
-    
+   
     if isempty(Parser.Results.UrdfFilePath)
         error('Please pass URDF file path')
     else
