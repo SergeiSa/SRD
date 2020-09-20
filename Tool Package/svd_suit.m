@@ -12,6 +12,7 @@ if min(size(S)) > 1
 else
     s = S(1);
 end
+suit.s = s;
 
 %matlab-style automatic tolerance
 if nargin < 2 
