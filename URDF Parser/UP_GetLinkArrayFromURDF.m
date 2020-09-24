@@ -164,8 +164,8 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             body_obj.StlPath = body_struct.MeshPath;
             
             if ~isempty(body_struct.MeshPath)
-                body_obj.Mesh = stlread(body_struct.MeshPath);
-                body_obj.Mesh.vertices = body_obj.Mesh.vertices.*body_struct.MeshScale;
+                body_obj.Mesh = matlab.internal.meshio.stlread(body_struct.MeshPath);
+                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*body_struct.MeshScale;
             end
             
             if strcmp(joint_name,'fixed')

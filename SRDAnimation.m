@@ -132,15 +132,15 @@ classdef SRDAnimation < handle
                         continue;
                     end
                     
-                    vertices = obj.SimulationEngine.LinkArray(i).Mesh.vertices;
+                    Vertices = obj.SimulationEngine.LinkArray(i).Mesh.Vertices;
                         
                     Polygon = struct();
-                    Polygon.vertices = obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*vertices'...
+                    Polygon.vertices = obj.SimulationEngine.LinkArray(i).AbsoluteOrientation*Vertices'...
                         +obj.SimulationEngine.LinkArray(i).AbsoluteBase;
                     Polygon.vertices = Polygon.vertices';
                     
                     if isempty(old_h)
-                        Polygon.faces = obj.SimulationEngine.LinkArray(i).Mesh.faces;
+                        Polygon.faces = obj.SimulationEngine.LinkArray(i).Mesh.Faces;
                         
                         h{i} = patch(Polygon,'FaceColor',       [0.8 0.8 1.0], ...
                              'EdgeColor',       'none',        ...
