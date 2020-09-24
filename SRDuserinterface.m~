@@ -192,28 +192,35 @@ classdef SRDuserinterface < handle
         end
         
         %Task - symbolic expression of the inverse kinematics task
-        function InverseKinematicsEngine = SetupSymbolicInverseKinematics(obj, varargin)
+        function SetupSymbolicInverseKinematics(obj, varargin)
             Parser = inputParser;
             Parser.FunctionName = 'SRDuserinterface.SetupSymbolicInverseKinematics';
             Parser.addOptional('Task', []);
             Parser.addOptional('SymbolicEngine', []);
-            Parser.addOptional('ToSaveInverseKinematicsEngine', true);
+            Parser.addOptional('PolynomialDegree', 5);
+            Parser.addOptional('NumberOfSegments', []);
+            Parser.addOptional('SolverType', 'lsqnonlin');
+            Parser.addOptional('LookupTableTimeStep', 0.001);
+            Parser.addOptional('TimeStep', 0.01);
+            Parser.addOptional('problem', []);
+            Parser.addOptional('ToPlot', true);
+            Parser.addOptional('Verbose', true);
             Parser.parse(varargin{:});
             
-            if isempty(Parser.Results.SymbolicEngine)
+            
+            (obj, Task, SymbolicEngine)
+            
+            if nargin < 3
                 SymbolicEngine = obj.GetSymbolicEngine();
-            else
-                SymbolicEngine = Parser.Results.SymbolicEngine;
             end
+            n = SymbolicEngine.dof;
             
             %create InverseKinematicsEngine
             InverseKinematicsEngine = SRDInverseKinematics;
             %derive nessesary symbolic functions
-            InverseKinematicsEngine.IKsetup(SymbolicEngine, Parser.Results.Task);
-            
-            if Parser.Results.ToSaveInverseKinematicsEngine
-                obj.SaveInverseKinematicsEngine(InverseKinematicsEngine);
-            end
+            InverseKinematicsEngine.IKsetup(SymbolicEngine, Task);
+            % save InverseKinematicsEngine
+            obj.SaveInverseKinematicsEngine(InverseKinematicsEngine);
             rehash;
         end
         
