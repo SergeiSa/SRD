@@ -7,7 +7,8 @@ classdef SRDModelHandler < handle
         model_type_code = 1;
         %options: 0 - 'not configured', 
         %         1 - 'exact'
-        %         2 - 'OrtegaSpong'
+        %         2 - 'OrtegaSpong' - with parameters as inputs,
+        %         regressor-style
         %         3 - 'numeric'
         
         %%%%%%%%%%%
@@ -35,6 +36,8 @@ classdef SRDModelHandler < handle
     end
     methods
         
+        %%%%%%%%%%%%%%%%%%%%
+        % class constructor
         function obj = SRDModelHandler(Casadi)
             if nargin < 1
                 Casadi = false;
@@ -42,6 +45,21 @@ classdef SRDModelHandler < handle
             obj.Casadi = Casadi;
             
             if Casadi
+                obj.SRDModelHandler_constructor_Casadi();
+            else
+                obj.SRDModelHandler_constructor_symbolic();
+            end
+        end
+        
+        function SRDModelHandler_constructor_symbolic(obj)
+                obj.g_dynamics_JSIM = @g_dynamics_JSIM;
+                obj.g_dynamics_RHS = @g_dynamics_RHS;
+                obj.g_dynamics_ControlMap = @g_dynamics_ControlMap;
+                obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian = @g_dynamics_LagrangeMultiplier_ConstraintJacobian;
+                obj.ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController;
+                %this is a function handle used in computed torque controller
+        end
+        function SRDModelHandler_constructor_Casadi(obj)
                 import casadi.*
                 
                 g_dynamics_JSIM_C = external('g_dynamics_JSIM', './g_dynamics.so');
@@ -57,16 +75,9 @@ classdef SRDModelHandler < handle
                 obj.g_dynamics_RHS = @(q, v, u) full(evalf(g_dynamics_RHS_C(q, v, u)));
                 obj.g_dynamics_ControlMap = @(q) full(evalf(g_dynamics_ControlMap_C(q)));
                 obj.ForcesForComputedTorqueController = @(q, v) full(evalf(ForcesForComputedTorqueController_C(q, v)));
-                
-            else
-                obj.g_dynamics_JSIM = @g_dynamics_JSIM;
-                obj.g_dynamics_RHS = @g_dynamics_RHS;
-                obj.g_dynamics_ControlMap = @g_dynamics_ControlMap;
-                obj.g_dynamics_LagrangeMultiplier_ConstraintJacobian = @g_dynamics_LagrangeMultiplier_ConstraintJacobian;
-                obj.ForcesForComputedTorqueController = @g_control_ForcesForComputedTorqueController;
-                %this is a function handle used in computed torque controller
-            end
-        end
+        end        
+        %%%%%%%%%%%%%%%%%%%%
+        
         
         function Setup(obj, MechanicalEquations_Numeric)
             %check if g_dynamics_JSIM and other dynamics functions require

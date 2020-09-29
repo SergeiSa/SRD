@@ -183,6 +183,9 @@ classdef TPSplineConstructorUI < handle
                 q(i) = obj.SplineArray.ZeroOrderDerivative(i).EvaluateSpline(t);
             end
         end
+        function handle = get_EvaluateQ_handle(obj)
+            handle = @(t) EvaluateQ(obj, t);
+        end
         
         %This function evaluates the first derivative of a spline at a time t
         function v = EvaluateV(obj, t)
@@ -191,6 +194,9 @@ classdef TPSplineConstructorUI < handle
                 v(i) = obj.SplineArray.FirstOrderDerivative(i).EvaluateSpline(t);
             end
         end
+        function handle = get_EvaluateV_handle(obj)
+            handle = @(t) EvaluateV(obj, t);
+        end
         
         %This function evaluates the second derivative of a spline at a time t
         function a = EvaluateA(obj, t)
@@ -198,6 +204,9 @@ classdef TPSplineConstructorUI < handle
             for i = 1:obj.NumberOfSplines
                 a(i) = obj.SplineArray.SecondOrderDerivative(i).EvaluateSpline(t);
             end
+        end
+        function handle = get_EvaluateA_handle(obj)
+            handle = @(t) EvaluateA(obj, t);
         end
         
         %This function evaluates spline at a time t, well as its first and

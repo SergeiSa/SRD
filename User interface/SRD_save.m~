@@ -1,0 +1,18 @@
+function SRD_save(object_to_save, objet_name, CustomPath)
+
+if nargin < 3
+    CustomPath = 'datafile_SRD_Objects.m';
+end
+
+if exist(CustomPath, 'file') == 2
+    temp = load(CustomPath);
+    SRD_container = temp.SRD_container;
+else
+    SRD_container = containers.Map;
+end
+
+SRD_container(objet_name) = object_to_save;
+
+save('datafile_SRD_Objects.m');
+
+end

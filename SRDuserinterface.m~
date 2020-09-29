@@ -44,32 +44,44 @@ classdef SRDuserinterface < SRDinterface
             Parser.addOptional('ToAnimateRobotAfterGeneration', false);
             Parser.parse(varargin{:});
                         
+            LinkArray       = Parser.Results.LinkArray;
             InitialPosition = Parser.Results.InitialPosition;
-              
+            AxisLimits      = Parser.Results.AxisLimits;
+            ViewAngle       = Parser.Results.ViewAngle;
+            
+            %Save LinkArray
+            save(obj.FileName_LinkArray, 'LinkArray');
+            %Save AxisLimits
+            save(obj.FileName_AxisLimits, 'AxisLimits');
+            %Save ViewAngle
+            save(obj.FileName_ViewAngle, 'ViewAngle');
+            
             %We create SimulationEngine, it will be used for simulation and
             %other things
-            SimulationEngine = SRDSimulationEngine(Parser.Results.LinkArray);
+            SimulationEngine = SRDSimulationEngine(LinkArray);
             
             %Pass InitialPosition to SimulationEngine and also save it
-            %Update the mechanism, so it will take initial configuration
             SimulationEngine.IC.q = InitialPosition;
-            SimulationEngine.Update(InitialPosition);
-            SRD_save(InitialPosition, 'InitialPosition');
+            obj.SaveInitialPosition(InitialPosition);
             
+            %Update the mechanism, so it will take initial configuration
+            SimulationEngine.Update(InitialPosition);
+            
+            SRD_save(InitialPosition, 'InitialPosition');
             obj.SaveSimulationEngine(SimulationEngine);
             
             rehash;
             
-%             if Parser.Results.ToAnimateRobotAfterGeneration
-%                 %Display the initial position of the mechanism
-%                 Animation = SRDAnimation();
-%                 Animation.ToDrawFrames = Parser.Results.ToDrawFrames;
-%                 if Parser.Results.ToDrawMeshes
-%                     Animation.DrawType = 'STL';
-%                 end
-%                 Animation.DrawIC();
-%                 xlabel('x axis'); ylabel('y axis'); zlabel('z axis');
-%             end
+            if Parser.Results.ToAnimateRobotAfterGeneration
+                %Display the initial position of the mechanism
+                Animation = SRDAnimation();
+                Animation.ToDrawFrames = Parser.Results.ToDrawFrames;
+                if Parser.Results.ToDrawMeshes
+                    Animation.DrawType = 'STL';
+                end
+                Animation.DrawIC();
+                xlabel('x axis'); ylabel('y axis'); zlabel('z axis');
+            end
         end
         
         

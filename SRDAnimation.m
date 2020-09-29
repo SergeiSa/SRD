@@ -1,6 +1,4 @@
-%This class implements some animation functionality for chains
-%defined by ChainClass
-%last update 03.06.16
+%This class implements some animation functionality
 classdef SRDAnimation < handle
     properties
         %%%%%%%%%%%%%%%%%%%
@@ -29,7 +27,7 @@ classdef SRDAnimation < handle
         
         %%%%%%%%%%%%%%%%%%%
         %%%%Render body frames
-        DrawFrames = false;
+        ToDrawFrames = false;
         
         %%%%%%%%%%%%%%%%%%%
         %%%% Position Sequence
@@ -50,6 +48,11 @@ classdef SRDAnimation < handle
         EdgeAlpha = 1;
         FaceAlpha = 1;
         LineWidth = 1;
+        
+        STL_FaceColor = [0.8 0.8 1.0];
+        STL_EdgeColor = 'none';
+        STL_FaceLighting = 'gouraud';
+        STL_AmbientStrength = 0.15;
         
         %%%%%%%%%%%%%%%%%%%
         %%%% objects of SRD classes;
@@ -86,7 +89,6 @@ classdef SRDAnimation < handle
                     h = obj.DrawDefault(q, old_h);
                 case 'Custom'
                     h = obj.DrawCustom(q, old_h);
-
                 case 'STL'
                      h = obj.DrawSTL(q, old_h);
 
@@ -122,8 +124,8 @@ classdef SRDAnimation < handle
             camlight('headlight');
             material('dull');
             
-            if obj.DrawFrames
-                obj.drawBodyFrames();
+            if obj.ToDrawFrames
+                obj.DrawBodyFrames();
             end
             for i = 1:n
                 if obj.SimulationEngine.LinkArray(i).Order > 0
@@ -142,11 +144,10 @@ classdef SRDAnimation < handle
                     if isempty(old_h)
                         Polygon.faces = obj.SimulationEngine.LinkArray(i).Mesh.Faces;
                         
-                        h{i} = patch(Polygon,'FaceColor',       [0.8 0.8 1.0], ...
-                             'EdgeColor',       'none',        ...
-                             'FaceLighting',    'gouraud',     ...
-                             'AmbientStrength', 0.15);
-                         
+                        h{i} = patch(Polygon, 'FaceColor',       obj.STL_FaceColor,        ...
+                                              'EdgeColor',       obj.STL_EdgeColor,        ...
+                                              'FaceLighting',    obj.STL_FaceLighting,     ...
+                                              'AmbientStrength', obj.STL_AmbientStrength);               
                     else
                         h{i}.Vertices = Polygon.vertices;
                     end
@@ -156,7 +157,7 @@ classdef SRDAnimation < handle
 
         end
         
-        function drawBodyFrames(obj)
+        function DrawBodyFrames(obj)
             n = size(obj.SimulationEngine.LinkArray, 1);
 
             for i = 1:n

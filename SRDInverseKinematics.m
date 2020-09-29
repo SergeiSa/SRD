@@ -186,7 +186,7 @@ classdef SRDInverseKinematics < handle
                 TaskJacobian_derivative = jacobian(TaskJacobian(:), SymbolicEngine.q) * SymbolicEngine.v;
                 TaskJacobian_derivative = reshape(TaskJacobian_derivative, size(TaskJacobian));
                 
-                obj.generate_IK_function_Casadi(Task, TaskJacobian, TaskJacobian_derivative, SymbolicEngine)  
+                obj.generate_IK_function_Casadi(Task, TaskJacobian, TaskJacobian_derivative, SymbolicEngine);  
                 
             else
                 tic;
