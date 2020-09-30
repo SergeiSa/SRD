@@ -168,12 +168,7 @@ classdef SRDMechanicalEquations < SRDChain
             obj.Casadi = Casadi;
             
             if obj.Casadi
-                import casadi.*
-                
-                obj.q = SX.sym('q', [obj.dof, 1]);
-                obj.v = SX.sym('v', [obj.dof, 1]);
-                obj.a = SX.sym('a', [obj.dof, 1]);
-                obj.M = SX.sym('M', [3, obj.nob]);
+                obj.CasadiInitialization;
             else
                 obj.q = sym('q', [obj.dof, 1]);
                 obj.v = sym('v', [obj.dof, 1]);
@@ -187,6 +182,15 @@ classdef SRDMechanicalEquations < SRDChain
             
             addlistener(obj, 'UseParallelizedSimplification', 'PostSet', @obj.handleParallelizationEvents);
             addlistener(obj, 'NumberOfWorkers',               'PostSet', @obj.handleParallelizationEvents);
+        end
+        
+        function CasadiInitialization(obj)
+            import casadi.*
+            
+            obj.q = SX.sym('q', [obj.dof, 1]);
+            obj.v = SX.sym('v', [obj.dof, 1]);
+            obj.a = SX.sym('a', [obj.dof, 1]);
+            obj.M = SX.sym('M', [3, obj.nob]);
         end
         
         

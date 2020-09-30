@@ -138,14 +138,6 @@ description.FunctionName_TaskJacobian_derivative  = Parser.Results.FunctionName_
         system(command);
         %!gcc -fPIC -shared g_InverseKinematics.c -o g_InverseKinematics.so
         
-%         external_Task = external(Parser.Results.FunctionName_Task, ['./', so_function_name]);
-%         external_TaskJacobian = external(Parser.Results.Function_TaskJacobian, so_function_name);
-%         external_TaskJacobian_derivative = external(Parser.Results.Function_TaskJacobian_derivative, so_function_name);
-%         
-%         handles.Task = @(q) full(evalf(external_Task(q)));
-%         handles.TaskJacobian = @(q) full(evalf(external_TaskJacobian(q)));
-%         handles.TaskJacobian_derivative = @(q) full(evalf(external_TaskJacobian_derivative(q)));
-        
         if ~isempty(Parser.Results.Path)
             cd(current_dir);
         end
@@ -155,23 +147,23 @@ description.FunctionName_TaskJacobian_derivative  = Parser.Results.FunctionName_
 
     function generate_functions_function_symbolic(Task, TaskJacobian, TaskJacobian_derivative, Parser)
         
-        FileName_Task                    = [Parser.Results.Path, '/', Parser.Results.FunctionName_Task];
-        FileName_TaskJacobian            = [Parser.Results.Path, '/', Parser.Results.FunctionName_TaskJacobian];
-        FileName_TaskJacobian_derivative = [Parser.Results.Path, '/', Parser.Results.FunctionName_TaskJacobian_derivative];
+        FileName_Task                    = [Parser.Results.Path, Parser.Results.FunctionName_Task];
+        FileName_TaskJacobian            = [Parser.Results.Path, Parser.Results.FunctionName_TaskJacobian];
+        FileName_TaskJacobian_derivative = [Parser.Results.Path, Parser.Results.FunctionName_TaskJacobian_derivative];
         
-        disp('Starting writing function for the inverse kinematics task');
+        disp(['Starting writing function ', FileName_Task]);
         matlabFunction(Task, 'File', FileName_Task, ...
             'Vars', {Parser.Results.SymbolicEngine.q}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
-        disp('Starting writing function for the inverse kinematics task jacobian');
+        disp(['Starting writing function ', FileName_TaskJacobian]);
         matlabFunction(TaskJacobian, 'File', FileName_TaskJacobian, ...
             'Vars', {Parser.Results.SymbolicEngine.q}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
-        disp('Starting writing function for the derivative of the inverse kinematics task jacobian');
+        disp(['Starting writing function ', FileName_TaskJacobian_derivative]);
         matlabFunction(TaskJacobian_derivative, 'File', FileName_TaskJacobian_derivative, ...
             'Vars', {Parser.Results.SymbolicEngine.q, Parser.Results.SymbolicEngine.v}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
-        disp('* Finished generating inverse kinematics functions'); disp(' ')
+        disp('* Finished generating functions'); disp(' ')
     end
 
 end

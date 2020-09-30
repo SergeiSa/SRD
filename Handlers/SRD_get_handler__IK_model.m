@@ -25,7 +25,6 @@ if Casadi
     
     Handler_IK_Model.PostSerializationPrepFunction = @PostSerializationPrepFunction;
     Handler_IK_Model.PreSerializationPrepFunction = @PreSerializationPrepFunction;
-
     
 else
     Handler_IK_Model.get_Task                = str2func(Handler_IK_Model.State.description.FunctionName_Task);
