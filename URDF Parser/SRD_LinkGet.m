@@ -1,8 +1,8 @@
-function [] = SRDSetUsedGenCoordinates(link_array, link_name, gen_coords)
+function found_link = SRD_LinkGet(link_array, link_name)
     for link_idx = 1:length(link_array)
         link = link_array(link_idx);
         if strcmp(link_name,link.Name)
-            link.SetUsedGenCoordinates(gen_coords);
+            found_link = link;
             break
         end    
     end

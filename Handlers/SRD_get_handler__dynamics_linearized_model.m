@@ -2,9 +2,6 @@ function Handler_dynamics_Linearized_Model = SRD_get_handler__dynamics_linearize
 Parser = inputParser;
 Parser.FunctionName = 'SRD_get_handler__dynamics_linearized_model';
 Parser.addOptional('description', []);
-% Parser.addOptional('dof_configuration_space_robot', []);
-% Parser.addOptional('dof_state_space_robot', []);
-% Parser.addOptional('dof_control', []);
 Parser.parse(varargin{:});
 
 description = Parser.Results.description;

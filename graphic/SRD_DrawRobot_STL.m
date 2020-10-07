@@ -18,7 +18,7 @@ end
 %             material('dull');
 
 for i = 1:n
-    if obj.SimulationEngine.LinkArray(i).Order > 0
+    if SimulationEngine.LinkArray(i).Order > 0
         index = index + 1;
         if isempty(SimulationEngine.LinkArray(i).StlPath)
             continue;
@@ -34,8 +34,15 @@ for i = 1:n
         if isempty(old_h)
             Polygon.faces = SimulationEngine.LinkArray(i).Mesh.Faces;
             
+            if isempty(SimulationEngine.LinkArray(i).Color)
+                LinkFaceColor = FaceColor;
+            else
+                LinkFaceColor = SimulationEngine.LinkArray(i).Color;
+            end
+                
+            
             h.STL{i} = patch(Polygon, ...
-                'FaceColor',       FaceColor,        ...
+                'FaceColor',       LinkFaceColor,        ...
                 'EdgeColor',       EdgeColor,        ...
                 'FaceLighting',    FaceLighting,     ...
                 'AmbientStrength', AmbientStrength); hold on;

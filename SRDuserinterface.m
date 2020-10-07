@@ -32,7 +32,7 @@ classdef SRDuserinterface < SRDinterface
         %
         % AxisLimits - defines the limits for the axes
         % ViewAngle - defines the camera view angle
-        function CreateRobotStructure(obj, varargin)
+        function SimulationEngine = CreateRobotStructure(obj, varargin)
             Parser = inputParser;
             Parser.FunctionName = 'CreateRobotStructure';
             Parser.addOptional('LinkArray', []);
@@ -54,7 +54,6 @@ classdef SRDuserinterface < SRDinterface
             %Update the mechanism, so it will take initial configuration
             SimulationEngine.IC.q = InitialPosition;
             SimulationEngine.Update(InitialPosition);
-            SRD_save(InitialPosition, 'InitialPosition');
             
             obj.SaveSimulationEngine(SimulationEngine);
             
@@ -81,6 +80,9 @@ classdef SRDuserinterface < SRDinterface
             Parser.addOptional('ToDrawFrames', false);
             Parser.addOptional('ToDrawMeshes', false);
             
+            Parser.addOptional('Animation_ToUseGrid', true);
+            Parser.addOptional('Animation_ToUseGridMinor', true);
+            
             Parser.addOptional('DrawRobot_Default_RobotColor', [0.6 0.3 0]);
             Parser.addOptional('DrawRobot_Default_EdgeAlpha', 0.3);
             Parser.addOptional('DrawRobot_Default_FaceAlpha', 1);
@@ -90,6 +92,8 @@ classdef SRDuserinterface < SRDinterface
             Parser.addOptional('DrawRobot_STL_EdgeColor', 'none');
             Parser.addOptional('DrawRobot_STL_FaceLighting', 'gouraud');
             Parser.addOptional('DrawRobot_STL_AmbientStrength', 0.15);
+            Parser.addOptional('DrawRobot_STL_camlight', 'headlight');
+            Parser.addOptional('DrawRobot_STL_material', 'dull');
             
             Parser.addOptional('DrawRobot_Frame_Scale', 0.2);
             Parser.addOptional('DrawRobot_Frame_LineWidth', 1);
@@ -108,6 +112,9 @@ classdef SRDuserinterface < SRDinterface
             visuals_config.ToDrawFrames = Parser.Results.ToDrawFrames;
             visuals_config.ToDrawMeshes = Parser.Results.ToDrawMeshes;
             
+            visuals_config.Animation_ToUseGrid = Parser.Results.Animation_ToUseGrid;
+            visuals_config.Animation_ToUseGridMinor = Parser.Results.Animation_ToUseGridMinor;
+            
             visuals_config.DrawRobot_Default_RobotColor = Parser.Results.DrawRobot_Default_RobotColor;
             visuals_config.DrawRobot_Default_EdgeAlpha = Parser.Results.DrawRobot_Default_EdgeAlpha;
             visuals_config.DrawRobot_Default_FaceAlpha = Parser.Results.DrawRobot_Default_FaceAlpha;
@@ -117,6 +124,8 @@ classdef SRDuserinterface < SRDinterface
             visuals_config.DrawRobot_STL_EdgeColor = Parser.Results.DrawRobot_STL_EdgeColor;
             visuals_config.DrawRobot_STL_FaceLighting = Parser.Results.DrawRobot_STL_FaceLighting;
             visuals_config.DrawRobot_STL_AmbientStrength = Parser.Results.DrawRobot_STL_AmbientStrength;
+            visuals_config.DrawRobot_STL_camlight = Parser.Results.DrawRobot_STL_camlight;
+            visuals_config.DrawRobot_STL_material = Parser.Results.DrawRobot_STL_material;
             
             visuals_config.DrawRobot_Frame_Scale = Parser.Results.DrawRobot_Frame_Scale;
             visuals_config.DrawRobot_Frame_LineWidth = Parser.Results.DrawRobot_Frame_LineWidth;
@@ -133,6 +142,7 @@ classdef SRDuserinterface < SRDinterface
         function SymbolicEngine = DeriveEquationsForSimulation(obj, varargin)
             Parser = inputParser;
             Parser.FunctionName = 'DeriveEquationsForSimulation';
+            Parser.addOptional('LinkArray', []);
             Parser.addOptional('UseCasadi', false);
             Parser.addOptional('ToLinearize', false);     
             Parser.addOptional('ToSimplify', true);  
@@ -159,7 +169,7 @@ classdef SRDuserinterface < SRDinterface
             Parser.parse(varargin{:});
             
             %load created previously LinkArray 
-            LinkArray = obj.GetLinkArray;
+            LinkArray = Parser.Results.LinkArray;
             
             %Create SymbolicEngine that will be used for deriving equations
             if Parser.Results.ToRecreateSymbolicEngine
@@ -191,16 +201,16 @@ classdef SRDuserinterface < SRDinterface
             %Create dynamics eq. 
             SymbolicEngine.BuildDynamicsEquations(Parser.Results.ToSimplify, false);
             %Generate nesessary function from those equations
-            if Parser.Results.UseCasadi
-                SymbolicEngine.GenerateForwardDynamicsFunctions_Casadi();
-            else
-                SymbolicEngine.GenerateForwardDynamicsFunctions();
-            end
-            
-            %If requested generate linearized version of dynamics eq
-            if Parser.Results.ToLinearize
-                SymbolicEngine.DoLinearization(Parser.Results.ToSimplify);
-            end
+%             if Parser.Results.UseCasadi
+%                 SymbolicEngine.GenerateForwardDynamicsFunctions_Casadi();
+%             else
+%                 SymbolicEngine.GenerateForwardDynamicsFunctions();
+%             end
+%             
+%             %If requested generate linearized version of dynamics eq
+%             if Parser.Results.ToLinearize
+%                 SymbolicEngine.DoLinearization(Parser.Results.ToSimplify);
+%             end
             
             if Parser.Results.ToSaveSymbolicEngine
                 obj.SaveSymbolicEngine(SymbolicEngine);

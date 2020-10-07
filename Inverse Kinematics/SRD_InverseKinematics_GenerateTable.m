@@ -5,7 +5,10 @@ Parser.addOptional('Handler_IK_Model', []);
 Parser.addOptional('Handler_IK_task', []);
 Parser.addOptional('InitialGuess', []);
 Parser.addOptional('method', @SRD_InversePositionProblemSolver_lsqnonlin);
-Parser.addOptional('opts', optimoptions(@lsqnonlin,'SpecifyObjectiveGradient',true, 'Display', 'none'));
+Parser.addOptional('opts', optimoptions(@lsqnonlin, ...
+    'SpecifyObjectiveGradient', true, ...
+    'Display', 'none', ...
+     'Algorithm', 'levenberg-marquardt'));
 
 Parser.addOptional('TimeTable', []);
 

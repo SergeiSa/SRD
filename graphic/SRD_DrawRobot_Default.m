@@ -7,7 +7,7 @@ index = 0;
 if isempty(old_h)
     h.Default = cell(n, 1);
 else
-    if isfield(old_h, Default)
+    if isfield(old_h, 'Default')
         h.Default = old_h.Default;
     else
         h.Default = cell(n, 1);

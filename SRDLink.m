@@ -18,6 +18,7 @@ classdef SRDLink < handle
 
     StlPath = "";
     Mesh = struct('Faces',[],'Vertices',[]);
+    Color = [];
 
     UseAbsoluteCoordinates = false; 
     %if true the Update function will not change the .AbsoluteOrientation

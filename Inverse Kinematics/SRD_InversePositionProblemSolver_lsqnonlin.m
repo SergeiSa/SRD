@@ -1,7 +1,7 @@
 function q = SRD_InversePositionProblemSolver_lsqnonlin(Task, TaskJacobian, Value, InitialGuess, opts)
 
 if nargin < 5
-    opts = optimoptions(@lsqnonlin,'SpecifyObjectiveGradient',true);
+    opts = optimoptions(@lsqnonlin,'SpecifyObjectiveGradient',true, 'Algorithm', 'levenberg-marquardt');
 end
 
 % [q,resnorm,res,eflag,output] = lsqnonlin(@Objective, InitialGuess, [], [], opts);
