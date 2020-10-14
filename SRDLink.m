@@ -39,7 +39,16 @@ classdef SRDLink < handle
     Inertia = [];               %the inertia of the link
                                 
     Name = [];                  %The name of the link
-
+    
+    %%%%%%%%%%%%%%%%%%%
+    % for symbolic/AD derivations
+    Jacobian_CenterOfMass = [];
+    Jacobian_AngularVelocity = [];
+    
+    AbsoluteOrientation_derivative = [];
+    AngularVelocity = [];
+    %%%%%%%%%%%%%%%%%%%
+    
     %dynamically added additional parameters
     calculated = [];
     

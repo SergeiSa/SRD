@@ -22,7 +22,7 @@ Handler_solver_Taylor.Update = @() Update(...
 Handler_solver_Taylor.SerializationPrepNeeded = true;
 Handler_solver_Taylor.PreSerializationPrepFunction = @PreSerializationPrepFunction;
     function PreSerializationPrepFunction(~)
-        error('do not attempt to save Handler_ComputedTorqueController; create a new one on the fly instead')
+        error('do not attempt to save Handler_solver_Taylor; create a new one on the fly instead')
     end
 
 

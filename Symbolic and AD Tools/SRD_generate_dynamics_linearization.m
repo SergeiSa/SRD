@@ -38,8 +38,6 @@ disp('* Linearization started');
 %
 % f= ddq = inv(H) * (T*u - c)
 %
-% f= ddq = inv(H) * (T*u - c)
-%
 % dx/dt = A*x+B*u+lc
 %
 % A = [0      I]

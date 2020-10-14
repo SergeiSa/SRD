@@ -8,6 +8,10 @@ Parser.addOptional('Symbolic_ToOptimizeFunctions', true);
 Parser.addOptional('Casadi_cfile_name', 'g_dynamics_generalized_coordinates');
 
 %H*ddq + c = T*u
+Parser.addOptional('H', []);
+Parser.addOptional('c', []);
+Parser.addOptional('T', []);
+
 Parser.addOptional('FunctionName_H', 'g_dynamics_H');
 Parser.addOptional('FunctionName_c', 'g_dynamics_c');
 Parser.addOptional('FunctionName_T', 'g_dynamics_T');
@@ -33,11 +37,11 @@ end
 disp('* Generation of dynamics functions started');
 
 if SymbolicEngine.Casadi
-    generate_functions_Casadi(Parser, SymbolicEngine);
+    generate_functions_Casadi(Parser);
     description.Casadi_cfile_name = Parser.Results.Casadi_cfile_name;
 else
     tic
-    generate_functions_symbolic(Parser, SymbolicEngine);
+    generate_functions_symbolic(Parser);
     toc
 end    
             
@@ -55,12 +59,12 @@ disp('* Generation of dynamics functions finished');
 % function generation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    function generate_functions_Casadi(Parser, SymbolicEngine)
+    function generate_functions_Casadi(Parser)
         import casadi.*
         
-        H = SymbolicEngine.ForwardDynamicsStructure.JSIM;
-        c = SymbolicEngine.ForwardDynamicsStructure.ForcesForComputedTorqueController;
-        T = SymbolicEngine.ForwardDynamicsStructure.ControlActionsToGenMotorTorquesMap;
+        H = Parser.Results.H;
+        c = Parser.Results.c;
+        T = Parser.Results.T;
         
         %generate functions
         disp(['Starting writing function for the ', Parser.Results.FunctionName_H]);
@@ -112,11 +116,11 @@ disp('* Generation of dynamics functions finished');
     end
 
 
-    function generate_functions_symbolic(Parser, SymbolicEngine)
+    function generate_functions_symbolic(Parser)
         
-        H = SymbolicEngine.ForwardDynamicsStructure.JSIM;
-        c = SymbolicEngine.ForwardDynamicsStructure.ForcesForComputedTorqueController;
-        T = SymbolicEngine.ForwardDynamicsStructure.ControlActionsToGenMotorTorquesMap;
+        H = Parser.Results.H;
+        c = Parser.Results.c;
+        T = Parser.Results.T;
 
         FileName_H = [Parser.Results.Path, Parser.Results.FunctionName_H];
         FileName_c = [Parser.Results.Path, Parser.Results.FunctionName_c];

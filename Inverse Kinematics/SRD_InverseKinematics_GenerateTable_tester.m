@@ -4,6 +4,7 @@ Parser.FunctionName = 'SRD_InverseKinematics_GenerateTable';
 Parser.addOptional('Handler_IK_Model', []);
 Parser.addOptional('TimeTable', []);
 Parser.addOptional('IK_Table', []);
+Parser.addOptional('tol', 10^(-5));
 
 Parser.parse(varargin{:});
 
@@ -19,7 +20,7 @@ for i = 1:Count
     
     %condition_number_tape(i) = cond(J*J');
     condition_number_tape(i) = cond(J);
-    rank_tape(i) = rank(J);
+    rank_tape(i) = rank(J, Parser.Results.tol);
 end
 
 figure('Color', 'w', 'Name', 'GenerateTable tester 1')

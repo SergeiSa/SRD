@@ -11,7 +11,7 @@ classdef SRDuserinterface < SRDinterface
             RelativeFollower = [0; 0; 0];
             RelativeCoM = [0; 0; 0];
             Mass = 0;
-            Inertia = eye(3);
+            Inertia = zeros(3, 3);
             Name = 'Ground';
             save('datafile_ground', 'RelativeBase', 'RelativeFollower', 'RelativeCoM', 'Mass', 'Inertia', 'Name');
             rehash;
