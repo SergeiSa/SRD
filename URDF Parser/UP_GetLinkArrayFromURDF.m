@@ -69,7 +69,10 @@ function result = UP_GetLinkArrayFromURDF(varargin)
         Inertia(3,3) = inertia_vec(3);
         Inertia(3,2) = inertia_vec(4);
         Inertia(3,1) = inertia_vec(5);
-        Inertia(2,1) = inertia_vec(6);
+        Inertia(2,1) = inertia_vec(6);        
+        Inertia(2,3) = inertia_vec(4);
+        Inertia(1,3) = inertia_vec(5);
+        Inertia(1,2) = inertia_vec(6);
 
         RelativeFollower = [];
         RelativeBase = [0; 0; 0];
