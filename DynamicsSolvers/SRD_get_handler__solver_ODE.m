@@ -1,7 +1,7 @@
-function Handler_solver_Taylor = SRD_get_handler__solver_Taylor(varargin)
+function Handler_solver_Taylor = SRD_get_handler__solver_ODE(varargin)
 
 Parser = inputParser;
-Parser.FunctionName = 'SRD_get_handler__solver_Taylor';
+Parser.FunctionName = 'SRD_get_handler__solver_ImplicitTaylor';
 Parser.addOptional('Handler_State', []);
 Parser.addOptional('Handler_Controller', []);
 Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
@@ -29,26 +29,35 @@ Handler_solver_Taylor.PreSerializationPrepFunction = @PreSerializationPrepFuncti
     function Update(Handler_State, Handler_Controller, ...
             Handler_dynamics_generalized_coordinates_model, Handler_Simulation)
         
+        n = Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
+        
         dt = Handler_Simulation.TimeLog(Handler_Simulation.CurrentIndex + 1) - Handler_Simulation.TimeLog(Handler_Simulation.CurrentIndex);
         
-        q = Handler_State.q;
-        v = Handler_State.v;
-        
-        H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(q);
-        T = Handler_dynamics_generalized_coordinates_model.get_control_map(q);
-        c = Handler_dynamics_generalized_coordinates_model.get_bais_vector(q, v);
-        
+        q0 = Handler_State.q;
+        v0 = Handler_State.v;
         u = Handler_Controller.u;
         
-        a = H \ (T*u - c);
-        %a = pinv(H) * (T*u - c);
+        %[~, tape] = ode45(@ode_func, [0 dt], [q0; v0]);
+        [~, tape] = ode15s(@ode_func, [0 dt], [q0; v0]);
         
-        v = v + dt * a;
-        q = q + dt * v + 0.5 * dt^2 * a;
         
-        Handler_State.q = q;
-        Handler_State.v = v;
-        Handler_State.a = a;
+        Handler_State.q = reshape( tape(end, 1:n),       [], 1);
+        Handler_State.v = reshape( tape(end, (n+1):2*n), [], 1);
+        Handler_State.a = [];
+        
+        function dz = ode_func(~, z)
+            new_q = z(1:n);
+            new_v = z((n+1):end);
+            
+            H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(new_q);
+            T = Handler_dynamics_generalized_coordinates_model.get_control_map(new_q);
+            c = Handler_dynamics_generalized_coordinates_model.get_bais_vector(new_q, new_v);
+        
+            new_a = H \ (T*u - c);
+            %new_a = pinv(H) * (T*u - c);
+            
+            dz = [new_v; new_a];
+        end
     end
 
 end

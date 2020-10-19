@@ -46,8 +46,8 @@ Handler_ComputedTorqueController.PreSerializationPrepFunction = @PreSerializatio
         H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(Handler_State.q);
         T = Handler_dynamics_generalized_coordinates_model.get_control_map(Handler_State.q);
         
-        e = desired_q - Handler_State.q;
-        de = desired_v - Handler_State.v;
+        e  = reshape( (desired_q - Handler_State.q), [], 1);
+        de = reshape( (desired_v - Handler_State.v), [], 1);
         
         u_FB = pinv(T)*(H*(Kp*e + Kd*de));
         
