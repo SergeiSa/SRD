@@ -1,7 +1,7 @@
 %   This function returns absolute path of an STL mesh file and it's scale for a given 
 %   LinkName from URDF (UrdfFilePath) given XML node array (LinkXMLNodes) of all links in URDF 
-
-function [mesh_path,scale] = UPH_GetMeshInfoFromLinkName(varargin)
+%
+function [mesh_path,scale] = SRDhelper_GetMeshInfoFromLinkName(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'UPH_GetMeshPathFromLinkName';
     Parser.addOptional('LinkXMLNodes', []);
@@ -40,15 +40,15 @@ function [mesh_path,scale] = UPH_GetMeshInfoFromLinkName(varargin)
 
             %TODO:check if node is NULL
 
-            visual_node = UPH_FindXMLChildByName('XMLNode',link,'TagName','visual');
-            geometry_node = UPH_FindXMLChildByName('XMLNode',visual_node,'TagName','geometry');
-            mesh_node = UPH_FindXMLChildByName('XMLNode',geometry_node,'TagName','mesh');
+            visual_node = SRDhelper_FindXMLChildByName('XMLNode',link,'TagName','visual');
+            geometry_node = SRDhelper_FindXMLChildByName('XMLNode',visual_node,'TagName','geometry');
+            mesh_node = SRDhelper_FindXMLChildByName('XMLNode',geometry_node,'TagName','mesh');
 
             if ~isempty(mesh_node)
                 path = mesh_node.getAttribute('filename');
                 if mesh_node.hasAttribute('scale')
                     scale = mesh_node.getAttribute('scale');
-                    scale = str2num(scale(1));
+                    scale = str2double(scale(1));
                 end
                 path = char(path(1));
                 break;
@@ -57,7 +57,7 @@ function [mesh_path,scale] = UPH_GetMeshInfoFromLinkName(varargin)
 
     end
     if ~isempty(path)
-        [filepath,filename,ext] = fileparts(UrdfFilePath);
+        [filepath,~,~] = fileparts(UrdfFilePath);
         relative_path = [filepath '/' path];
         absolute_path = fullfile(pwd, relative_path);
         if exist(absolute_path,'file')

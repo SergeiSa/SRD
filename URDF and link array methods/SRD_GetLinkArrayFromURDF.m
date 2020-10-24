@@ -6,11 +6,9 @@ function result = UP_GetLinkArrayFromURDF(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'UP_GetLinkArrayFromURDF';
     Parser.addOptional('UrdfFilePath', []);
-    Parser.addOptional('ParseSTL', []);
+    Parser.addOptional('ParseSTL', false);
     Parser.parse(varargin{:});
-    
-    ParseSTL = false;
-    
+   
     if isempty(Parser.Results.UrdfFilePath)
         error('Please pass URDF file path')
     else
@@ -51,11 +49,11 @@ function result = UP_GetLinkArrayFromURDF(varargin)
         Mass = body.Mass;
         Name = body.Name;
         MeshPath = '';
-        
+        MeshScale = [1,1,1];
         if ~isempty(body.Visuals)
             
             if ParseSTL
-                [MeshPath,MeshScale] = UPH_GetMeshPathFromLinkName('LinkXMLNodes', links,...
+                [MeshPath,MeshScale] = SRDhelper_GetMeshInfoFromLinkName('LinkXMLNodes', links,...
                     'UrdfFilePath',UrdfFilePath,'LinkName',Name);
             else
                 
@@ -71,13 +69,16 @@ function result = UP_GetLinkArrayFromURDF(varargin)
         Inertia(3,3) = inertia_vec(3);
         Inertia(3,2) = inertia_vec(4);
         Inertia(3,1) = inertia_vec(5);
-        Inertia(2,1) = inertia_vec(6);
+        Inertia(2,1) = inertia_vec(6);        
+        Inertia(2,3) = inertia_vec(4);
+        Inertia(1,3) = inertia_vec(5);
+        Inertia(1,2) = inertia_vec(6);
 
         RelativeFollower = [];
         RelativeBase = [0; 0; 0];
 
         body_struct = struct('RelativeBase',RelativeBase, 'RelativeFollower',RelativeFollower,...
-            'RelativeCoM', RelativeCoM, 'Mass',Mass, 'Inertia',Inertia, 'Name',Name,'MeshPath',MeshPath);
+            'RelativeCoM', RelativeCoM, 'Mass',Mass, 'Inertia',Inertia, 'Name',Name,'MeshPath',MeshPath,'MeshScale',MeshScale);
 
         body_structs = [body_structs;body_struct];
     end
@@ -104,7 +105,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             match = arrayfun(name_matcher, 1:numel(result));
             parent_index = find(match);
             parent_obj = result(parent_index);
-
+            
             if strcmp(parent_name,ground_link_alias)
                 parent_obj = result(1);
             end
@@ -166,8 +167,8 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             body_obj.StlPath = body_struct.MeshPath;
             
             if ~isempty(body_struct.MeshPath)
-                body_obj.Mesh = stlread(body_struct.MeshPath);
-                body_obj.Mesh
+                body_obj.Mesh = matlab.internal.meshio.stlread(body_struct.MeshPath);
+                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*body_struct.MeshScale;
             end
             
             if strcmp(joint_name,'fixed')

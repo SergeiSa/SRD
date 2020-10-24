@@ -15,7 +15,7 @@ rank_tape = zeros(Count, 1);
 
 for i = 1:Count
     
-    q = Parser.Results.IK_Table(i, :);
+    q = reshape( Parser.Results.IK_Table(i, :), [], 1);
     J = Parser.Results.Handler_IK_Model.get_Jacobian(q);
     
     %condition_number_tape(i) = cond(J*J');

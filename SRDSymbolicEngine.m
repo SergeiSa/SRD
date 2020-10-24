@@ -1,17 +1,18 @@
-%This is an abstrunction, the last child of the class hierarchy, it should
+%This is an abstraction, the last child of the class hierarchy, it should
 %be used to create SymbolicEngine
-%last update 14.12.17
-classdef SRDSymbolicEngine < SRDControlEquations
+classdef SRDSymbolicEngine < SRDSymbolicEncoding
     properties
     end
     methods
         % class constructor
-        function obj = SRDSymbolicEngine(LinkArray, Casadi)
-            if nargin < 2
-                Casadi = false;
-            end
-            
-            obj = obj@SRDControlEquations(LinkArray, Casadi);
+        function obj = SRDSymbolicEngine(varargin)
+            Parser = inputParser;
+            Parser.FunctionName = 'SRDSymbolicEngine';
+            Parser.addOptional('LinkArray', []);
+            Parser.addOptional('Casadi', false);
+            Parser.parse(varargin{:});
+
+            obj = obj@SRDSymbolicEncoding(Parser.Results.LinkArray, Parser.Results.Casadi);
         end
     end
 end

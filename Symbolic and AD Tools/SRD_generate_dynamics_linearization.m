@@ -6,6 +6,11 @@ Parser.addOptional('SymbolicEngine', []);
 % Parser.addOptional('Symbolic_UseParallelizedSimplification', false);
 Parser.addOptional('Symbolic_ToOptimizeFunctions', true);
 
+%H*ddq + c = T*u
+Parser.addOptional('H', []);
+Parser.addOptional('c', []);
+Parser.addOptional('T', []);
+
 Parser.addOptional('Casadi_cfile_name', 'g_dynamics_linearization');
 
 Parser.addOptional('FunctionName_A', 'g_linearization_A');
@@ -54,9 +59,9 @@ disp('* Linearization started');
 %
 % df / dv = inv(H)* d(T*u - c)/dv
 
-H = SymbolicEngine.ForwardDynamicsStructure.JSIM;
-c = SymbolicEngine.ForwardDynamicsStructure.ForcesForComputedTorqueController;
-T = SymbolicEngine.ForwardDynamicsStructure.ControlActionsToGenMotorTorquesMap;
+H = Parser.Results.H;
+c = Parser.Results.c;
+T = Parser.Results.T;
 
 q = SymbolicEngine.q;
 v = SymbolicEngine.v;    

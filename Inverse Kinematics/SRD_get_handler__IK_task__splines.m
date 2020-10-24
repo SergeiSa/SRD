@@ -10,7 +10,7 @@ Parser.addOptional('OutOfBoundariesBehaviour', 'LastValue');
 
 Parser.parse(varargin{:});
 
-Spline = TPSplineConstructorUI();
+Spline = SRD_SplineConstructorUI();
 Spline.OutOfBoundariesBehaviour = Parser.Results.OutOfBoundariesBehaviour;
 Spline.GenerateSplines(Parser.Results.NodeTimes, ...
     Parser.Results.ZeroOrderDerivativeNodes, ...

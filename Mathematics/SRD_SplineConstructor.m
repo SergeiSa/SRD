@@ -1,5 +1,5 @@
 %This class works with polynomial splines
-classdef TPSplineConstructor < handle
+classdef SRD_SplineConstructor < handle
     properties
         Coefficients %Coefficients of the spline
         Times %a column vector that determines for which segment of time will
@@ -39,7 +39,7 @@ classdef TPSplineConstructor < handle
         %
         % Spline = TPSplineConstructor(Segments, Times)
         %
-        function obj = TPSplineConstructor(Segments, Times)
+        function obj = SRD_SplineConstructor(Segments, Times)
             if nargin == 2
             t = sym('t');
             obj.Times = Times;
@@ -150,7 +150,7 @@ classdef TPSplineConstructor < handle
         % than evaluating a derivative of the existing spline
         function Spline = GenerateDerivatveSpline(obj, Order)
             
-            Spline = TPSplineConstructor;
+            Spline = SRD_SplineConstructor;
             Spline.Coefficients = obj.Coefficients;
             Spline.Times = obj.Times;
             Spline.OutOfBoundariesBehaviour = obj.OutOfBoundariesBehaviour;

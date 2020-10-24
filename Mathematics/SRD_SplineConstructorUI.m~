@@ -6,9 +6,7 @@
 % -check for consistent lengths of the NodeValues arrays and NodeTimes
 % -check that first and last values in NodeValues.ZeroOrderDerivativeNodes
 % array are numbers
-%
-%Last updated 06.10.2016
-classdef TPSplineConstructorUI < handle
+classdef SRD_SplineConstructorUI < handle
     properties
         NodeTimes;
         %This array holds all node time for all the splines
@@ -39,8 +37,6 @@ classdef TPSplineConstructorUI < handle
         OutOfBoundariesValue = [];
     end
     methods
-        function obj = TPSplineConstructorUI()
-        end
         
         function GenerateSplines(obj, NodeTimes, ZeroOrderDerivativeNodes, FirstOrderDerivativeNodes, SecondOrderDerivativeNodes)
             
@@ -143,7 +139,7 @@ classdef TPSplineConstructorUI < handle
                 end
                 
                 %Generating splines
-                obj.SplineArray.ZeroOrderDerivative(i) = TPSplineConstructor(Segments, Times_for_this_spline);
+                obj.SplineArray.ZeroOrderDerivative(i) = SRD_SplineConstructor(Segments, Times_for_this_spline);
                 obj.SplineArray.ZeroOrderDerivative(i).OutOfBoundariesBehaviour = obj.OutOfBoundariesBehaviour;
                 
                 %Generating their derivative splines
@@ -294,6 +290,8 @@ classdef TPSplineConstructorUI < handle
                 otherwise
                     warrning('Invalid plot request')
             end
+            
+            
             
             BP = BetterPlotsClass;
             BP.LineWidth = LineWidth;

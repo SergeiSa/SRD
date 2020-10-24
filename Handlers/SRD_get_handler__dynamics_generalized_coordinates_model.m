@@ -25,10 +25,19 @@ if Casadi
     Handler_dynamics_generalized_coordinates_model.PreSerializationPrepFunction  = @PreSerializationPrepFunction;
 
 else
+    if ~isempty(description.Path)
+        current_dir = pwd;
+        cd(description.Path);
+    end
+    
     %H*ddq + c = T*u
-    Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = str2func(Handler_dynamics_generalized_coordinates_model.State.description.FunctionName_H);
-    Handler_dynamics_generalized_coordinates_model.get_bais_vector = str2func(Handler_dynamics_generalized_coordinates_model.State.description.FunctionName_c);
-    Handler_dynamics_generalized_coordinates_model.get_control_map = str2func(Handler_dynamics_generalized_coordinates_model.State.description.FunctionName_T);
+    Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = str2func(description.FunctionName_H);
+    Handler_dynamics_generalized_coordinates_model.get_bais_vector = str2func(description.FunctionName_c);
+    Handler_dynamics_generalized_coordinates_model.get_control_map = str2func(description.FunctionName_T);
+    
+    if ~isempty(description.Path)
+        cd(current_dir);
+    end
 end
 
         

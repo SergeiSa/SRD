@@ -26,10 +26,19 @@ if Casadi
     Handler_IK_Model.PostSerializationPrepFunction = @PostSerializationPrepFunction;
     Handler_IK_Model.PreSerializationPrepFunction = @PreSerializationPrepFunction;
     
-else
-    Handler_IK_Model.get_Task                = str2func(Handler_IK_Model.State.description.FunctionName_Task);
-    Handler_IK_Model.get_Jacobian            = str2func(Handler_IK_Model.State.description.FunctionName_TaskJacobian);
-    Handler_IK_Model.get_Jacobian_derivative = str2func(Handler_IK_Model.State.description.FunctionName_TaskJacobian_derivative);
+else   
+    if ~isempty(description.Path)
+        current_dir = pwd;
+        cd(description.Path);
+    end
+    
+    Handler_IK_Model.get_Task                = str2func(description.FunctionName_Task);
+    Handler_IK_Model.get_Jacobian            = str2func(description.FunctionName_TaskJacobian);
+    Handler_IK_Model.get_Jacobian_derivative = str2func(description.FunctionName_TaskJacobian_derivative);
+    
+    if ~isempty(description.Path)
+        cd(current_dir);
+    end
 end
 
 

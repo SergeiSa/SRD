@@ -194,6 +194,28 @@ classdef SRDMechanicalEquations < SRDChain
         end
         
         
+        function InitializeLinkArray(obj)
+            % Here we deal with the problem that RelativeFollower field
+            % is initialised as a numeric array, and then the code will
+            % attempt to modify it column by column; so to avoid Matlab
+            % trying to convert symbolic to numerical we need to make
+            % sure all matrices are converted to symbolic beforehand
+            for i = 1:size(obj.LinkArray, 1)
+                switch class(obj.q)
+                    case 'sym'
+                        obj.LinkArray(i).RelativeFollower = sym(obj.LinkArray(i).RelativeFollower);
+                    case 'double'
+                        %obj.LinkArray(i).RelativeFollower = obj.LinkArray(i).RelativeFollower;
+                    case 'casadi.SX'
+                        %obj.LinkArray(i).RelativeFollower = obj.LinkArray(i).RelativeFollower;
+                    otherwise
+                        error('invalid type of q')
+                end
+            end
+            
+            obj.Update(obj.q);       
+        end
+        
         % This function find a cell array of structures, see
         % description of GeometryArray property; Some of the field of
         % the elements of GeometryArray won't be filled up;
