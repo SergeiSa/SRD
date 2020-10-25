@@ -60,19 +60,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             end
         end
 
-        Inertia = eye(3);
-
-        inertia_vec = body.Inertia;
-
-        Inertia(1,1) = inertia_vec(1);
-        Inertia(2,2) = inertia_vec(2);
-        Inertia(3,3) = inertia_vec(3);
-        Inertia(3,2) = inertia_vec(4);
-        Inertia(3,1) = inertia_vec(5);
-        Inertia(2,1) = inertia_vec(6);        
-        Inertia(2,3) = inertia_vec(4);
-        Inertia(1,3) = inertia_vec(5);
-        Inertia(1,2) = inertia_vec(6);
+        Inertia = UPH_GetInertiaMatrix('LinkXMLNodes', links,'LinkName',Name);
 
         RelativeFollower = [];
         RelativeBase = [0; 0; 0];

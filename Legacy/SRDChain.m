@@ -1,6 +1,5 @@
 %This class implements methods for working with chains of links defined by
 %LinkWithJointClass
-%last update 03.06.16
 classdef SRDChain < handle
     properties
         LinkArray;           
@@ -27,7 +26,6 @@ classdef SRDChain < handle
             end
             obj.dof = size(GC, 1);
            
-            obj.Check();
             obj.Sort();
         end
         
@@ -74,12 +72,6 @@ classdef SRDChain < handle
             obj.nob = n;     
         end      
         
-        %this function checks whether or not all joints of the mechanism
-        %are compatible with the chosen mechanism type
-        function Check(~)
-            %warning('This method has not been implemented yet'); 
-        end
-         
     end
     methods (Access = public)
         %this function calculates mechanism's total mass

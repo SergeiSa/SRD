@@ -8,9 +8,9 @@ classdef SRDHandler_State < SRDHandler
         dof_robot;
     end
     methods
-%         function squized = get_position_velocity_acceleration(obj)            
-%             squized = [obj.q, obj.v, obj.a];
-%         end
+        function squized = get_position_velocity_acceleration(obj, ~)            
+            squized = [obj.q, obj.v, obj.a];
+        end
     end
 end
    

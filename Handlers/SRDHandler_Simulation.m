@@ -4,6 +4,8 @@ classdef SRDHandler_Simulation < SRDHandler
         CurrentTime = [];
         CurrentIndex = [];
         
+        
+        PreprocessingHandlersArray = {};
         ControllerArray = {};
         SolverArray = {};
         LoggerArray = {};
@@ -16,6 +18,9 @@ classdef SRDHandler_Simulation < SRDHandler
                 obj.CurrentTime = obj.TimeLog(i);
                 obj.CurrentIndex = i;
                 
+                for j = 1:length(obj.PreprocessingHandlersArray)
+                    obj.PreprocessingHandlersArray{j}.Update();
+                end
                 for j = 1:length(obj.ControllerArray)
                     obj.ControllerArray{j}.Update();
                 end

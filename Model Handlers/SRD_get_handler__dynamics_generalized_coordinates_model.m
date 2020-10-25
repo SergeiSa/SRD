@@ -2,6 +2,7 @@ function Handler_dynamics_generalized_coordinates_model = SRD_get_handler__dynam
 Parser = inputParser;
 Parser.FunctionName = 'SRD_get_handler__dynamics_generalized_coordinates_model';
 Parser.addOptional('description', []);
+Parser.addOptional('UsePinv', false);
 Parser.parse(varargin{:});
 
 description = Parser.Results.description;

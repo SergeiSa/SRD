@@ -5,8 +5,6 @@ FileName_visuals_config = SRD.FileName_visuals_config;
 visuals_config = load(FileName_visuals_config);
 visuals_config = visuals_config.visuals_config;
 
-view(visuals_config.ViewAngle);
-axis(visuals_config.AxisLimits);
 
 if visuals_config.Animation_ToUseGrid
     grid on;
@@ -30,4 +28,8 @@ switch Type
 end
 h = [];
 
+view(visuals_config.ViewAngle);
+axis(visuals_config.AxisLimits);
+
+axis equal;
 end

@@ -27,13 +27,13 @@ H = Parser.Results.JointSpaceInertiaMatrix;
 q = SymbolicEngine.q;
 v = SymbolicEngine.v;
 
-dH = jacobian( reshape(H, [], 1), q)*v;
-dH = reshape(dH, length(q), length(q));
+dH = jacobian( reshape(H, length(v)*length(v), 1), q)*v;
+dH = reshape(dH, length(v), length(v));
 
 if SymbolicEngine.Casadi
     
     KineticEnergy = 0.5*v' * H * v;
-    in = reshape(dH*v, [], 1) - reshape(jacobian(KineticEnergy, q), [], 1);
+    in = reshape(dH*v, length(v), 1) - reshape(jacobian(KineticEnergy, q), length(v), 1);
     
     %Alternative method - kinetic energy expression is not needed, but is slower
     %in = reshape(dH*v, [], 1) - 0.5*( jacobian( reshape(H, [], 1), q)'*kron(v, v) );

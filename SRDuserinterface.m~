@@ -8,8 +8,8 @@ classdef SRDuserinterface < SRDinterface
        
         function Ground = CreateGroundLink(~)
             RelativeBase = [0; 0; 0];
-            RelativeCoM = [0; 0; 0];
             RelativeFollower = [0; 0; 0];
+            RelativeCoM = [0; 0; 0];
             Mass = 0;
             Inertia = zeros(3, 3);
             Name = 'Ground';
@@ -18,11 +18,6 @@ classdef SRDuserinterface < SRDinterface
             
             Ground = SRDLinkWithJoint('none', 0, 'datafile_ground', [], []);
             Ground.RelativeOrientation = eye(3);
-            
-            Ground.AbsoluteBase = RelativeBase;
-            Ground.AbsoluteCoM = RelativeCoM;
-            Ground.AbsoluteFollower = RelativeFollower;
-            Ground.AbsoluteOrientation = eye(3);
         end
         
         % This function creates an SRD object that will be used for

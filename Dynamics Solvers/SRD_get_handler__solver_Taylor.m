@@ -34,13 +34,13 @@ Handler_solver_Taylor.PreSerializationPrepFunction = @PreSerializationPrepFuncti
         q = Handler_State.q;
         v = Handler_State.v;
         
-        H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(q);
+        iH = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix_inverse(q);
         T = Handler_dynamics_generalized_coordinates_model.get_control_map(q);
         c = Handler_dynamics_generalized_coordinates_model.get_bais_vector(q, v);
         
         u = Handler_Controller.u;
         
-        a = H \ (T*u - c);
+        a = iH * (T*u - c);
         %a = pinv(H) * (T*u - c);
         
         v = v + dt * a;

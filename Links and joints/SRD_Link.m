@@ -6,6 +6,7 @@ classdef SRD_Link < handle
     Name = [];                  %The name of the link
     
     Update = [];                %function handle, to be assigned
+    Joint = [];                %function handle, to be assigned
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                            
     %geometrical properties    
@@ -33,10 +34,12 @@ classdef SRD_Link < handle
     UseAbsoluteCoordinates = false; 
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                            
-    %visual properties                                
+    %visual properties    
+    Color = [];                            
     StlPath = [];
     Mesh = struct('Faces', [], 'Vertices', []);
-    Color = [];
+    
+    ToDisplay = [];
 
     %if true the Update function will not change the .AbsoluteOrientation
     %property

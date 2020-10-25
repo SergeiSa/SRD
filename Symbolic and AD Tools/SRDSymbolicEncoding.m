@@ -1,6 +1,5 @@
-%This class generates equations for kinematics and dynamics
-%last update 1.10.16
-classdef SRDSymbolicEncoding < SRDChain
+%This class stores info over teh use gneneralized coordinates and alike
+classdef SRDSymbolicEncoding < SRD_Chain
     properties
             
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,7 +28,7 @@ classdef SRDSymbolicEncoding < SRDChain
         % it also assignes a valuse to dissipation_coefficients
         % property
         function obj = SRDSymbolicEncoding(LinkArray, Casadi)
-            obj = obj@SRDChain(LinkArray);
+            obj = obj@SRD_Chain(LinkArray);
             
             obj.Casadi = Casadi;
             
@@ -38,6 +37,7 @@ classdef SRDSymbolicEncoding < SRDChain
             else
                 obj.q = sym('q', [obj.dof, 1]);
                 obj.v = sym('v', [obj.dof, 1]);
+                obj.u = sym('u', [obj.control_dof, 1]);
                 obj.SetAssumptions();
             end
         end
@@ -46,6 +46,7 @@ classdef SRDSymbolicEncoding < SRDChain
             import casadi.*
             obj.q = SX.sym('q', [obj.dof, 1]);
             obj.v = SX.sym('v', [obj.dof, 1]);
+            obj.u = SX.sym('u', [obj.control_dof, 1]);
         end
         
         
