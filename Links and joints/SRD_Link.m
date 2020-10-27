@@ -6,7 +6,7 @@ classdef SRD_Link < handle
     Name = [];                  %The name of the link
     
     Update = [];                %function handle, to be assigned
-    Joint = [];                %function handle, to be assigned
+    Joint = [];                 %class handle, to be assigned
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                            
     %geometrical properties    

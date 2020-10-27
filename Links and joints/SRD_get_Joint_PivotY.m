@@ -1,7 +1,7 @@
-function Joint = SRD_get_Joint_PivotX(varargin)
+function Joint = SRD_get_Joint_PivotY(varargin)
 
 Parser = inputParser;
-Parser.FunctionName = 'SRD_get_Joint_PivotX';
+Parser.FunctionName = 'SRD_get_Joint_PivotY';
 Parser.addOptional('Name', []);
 
 Parser.addOptional('ChildLink', []);
@@ -16,7 +16,7 @@ Parser.parse(varargin{:});
 
 Joint = SRD_Joint;
 
-Joint.Type = 'PivotX';
+Joint.Type = 'PivotY';
 
 Joint.Name            = Parser.Results.Name;
 Joint.ChildLink       = Parser.Results.ChildLink;
@@ -39,7 +39,7 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     function Update(Link, Input)
         q = Input(Link.Joint.UsedGeneralizedCoordinates);
         
-        Link.RelativeOrientation =  Link.Joint.DefaultJointOrientation * SRD_RotationMatrix3D_x(q);
+        Link.RelativeOrientation =  Link.Joint.DefaultJointOrientation * SRD_RotationMatrix3D_y(q);
         
         SRD_ForwardKinematics_JointUpdate_RelativeOrientationType(Link);
     end
@@ -51,8 +51,8 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
         
         %this is because torque_child is expressed in the relative
         %coordinates, while jacobians are in the absolute ones
-        torque_child  = Child_T * [u; 0; 0];
-        torque_parent = Child_T * [-u; 0; 0];
+        torque_child  = Child_T * [0; u; 0];
+        torque_parent = Child_T * [0; -u; 0];
         
         %get angular velocity jacobians
         Child_Jw = Joint.ChildLink.Jacobian_AngularVelocity;
