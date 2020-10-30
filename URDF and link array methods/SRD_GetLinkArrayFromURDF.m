@@ -31,20 +31,21 @@ function result = UP_GetLinkArrayFromURDF(varargin)
     %Create user interfase object for SRD
     SRD = SRDuserinterface;
     %Create ground link
-    Ground = SRD.CreateGroundLink();
-
-    result = [Ground];
-
+    result = [SRD_get_Link_Ground()];
+    joints = [];
+    result(1).RelativeFollower = [];
+    result(1).AbsoluteFollower = [];
     %Creating links
     body_count = robot.NumBodies;
     body_structs = [];
 
     ground_link_alias = robot.BaseName;
         
+    coord_index = 0;
     for body_idx=1:body_count
         body = robot.Bodies(body_idx);
         body = body{1};
-        
+        parent_link = body.Parent;
         RelativeCoM = reshape(body.CenterOfMass,[3,1]); 
         Mass = body.Mass;
         Name = body.Name;
@@ -64,22 +65,6 @@ function result = UP_GetLinkArrayFromURDF(varargin)
 
         RelativeFollower = [];
         RelativeBase = [0; 0; 0];
-
-        body_struct = struct('RelativeBase',RelativeBase, 'RelativeFollower',RelativeFollower,...
-            'RelativeCoM', RelativeCoM, 'Mass',Mass, 'Inertia',Inertia, 'Name',Name,'MeshPath',MeshPath,'MeshScale',MeshScale);
-
-        body_structs = [body_structs;body_struct];
-    end
-
-    %Parse joint info
-    coord_index = 0;
-
-    for body_idx=1:body_count
-        body = robot.Bodies(body_idx);
-        body = body{1};
-        parent_link = body.Parent;
-
-        body_struct = body_structs(body_idx);
 
 
         if length(parent_link)~=0
@@ -141,6 +126,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             joint_origin = transform_to_joint*[0;0;0;1];
             
             parent_obj.RelativeFollower = [parent_obj.RelativeFollower,joint_origin(1:3)];
+            parent_obj.AbsoluteFollower = [parent_obj.AbsoluteFollower,joint_origin(1:3)];
 
             orientation_matrix = transform_to_joint(1:3,1:3);
    
@@ -148,29 +134,55 @@ function result = UP_GetLinkArrayFromURDF(varargin)
                 joint_name = 'fixed';
             end
 
-            body_obj = SRDLinkWithJoint('JointType',joint_name,'Order', body_idx,'FileName', [],...
-            'LinkParametersStructure', body_struct, 'ParentLink', parent_obj,'ParentFollowerNumber', size(parent_obj.RelativeFollower,2));%!!!
+%             body_obj = SRDLinkWithJoint('JointType',,'Order', body_idx,'FileName', [],...
+%             'LinkParametersStructure', body_struct, 'ParentLink', parent_obj,'ParentFollowerNumber',
+%             size(parent_obj.RelativeFollower,2));%!!!
+%             
             
-            body_obj.PivotZeroOrientation = orientation_matrix;
-            body_obj.StlPath = body_struct.MeshPath;
+            body_obj = SRD_get_Link(...
+                'Order', body_idx, ...
+                'Name', Name, ...
+                'RelativeBase', RelativeBase, ...
+                'RelativeFollower', RelativeFollower, ...
+                'RelativeCoM', RelativeCoM, ...
+                'Mass', Mass, ...
+                'Inertia', Inertia, ...
+                'ToDisplay', true, ...
+                'Color', 'r', ...
+                'StlPath', MeshPath);
+
+            body_obj.StlPath = MeshPath;
             
-            if ~isempty(body_struct.MeshPath)
-                body_obj.Mesh = matlab.internal.meshio.stlread(body_struct.MeshPath);
-                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*body_struct.MeshScale;
+            if ~isempty(MeshPath)
+                body_obj.Mesh = matlab.internal.meshio.stlread(MeshPath);
+                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*MeshScale;
             end
             
-            if strcmp(joint_name,'fixed')
-                body_obj.SetUsedGenCoordinates([]);
-
-            else
-                coord_index_new = coord_index + body_obj.GetJointInputsRequirements();
-                body_obj.SetUsedGenCoordinates( (coord_index+1):coord_index_new );
+            current_gen_coords = [];
+            if ~strcmp(joint_name,'fixed')
+                coord_index_new = coord_index + GetJointInputsRequirements(joint_name);
+                current_gen_coords = (coord_index+1):coord_index_new;
                 coord_index = coord_index_new;
             end
+            
 
+             new_joint = SRD_get_Joint(...
+                    'Name', [Name,'Joint'], ...
+                    'Type', joint_name, ...
+                    'ChildLink',  body_obj, ...
+                    'ParentLink', parent_obj, ...
+                    'ParentFollowerNumber', size(parent_obj.RelativeFollower,2), ...
+                    'UsedGeneralizedCoordinates', current_gen_coords, ...
+                    'UsedControlInputs', current_gen_coords, ...
+                    'DefaultJointOrientation', orientation_matrix);
+            
+            
             result = [result; body_obj];
+            joints = [joints; new_joint]
         end
     end
+
+
 
     
     for i = 1:length(result)
@@ -182,4 +194,23 @@ function result = UP_GetLinkArrayFromURDF(varargin)
 
 end
 
+function ProperSize = GetJointInputsRequirements(JointType)
+    switch JointType
+        case {'none', 'fixed'}
+            ProperSize = 0;
+        case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX'}
+            ProperSize = 6;
+        case {'abs_spherical', 'prismatic_XYZ', ...
+              'planarX', 'planarY', 'planarZ', ...
+              'abs_planarX', 'abs_planarY', 'abs_planarZ'}
+            ProperSize = 3;
+        case {'pivotXY', 'pivotYZ', 'pivotZX'}
+            ProperSize = 2;
+        case {'pivotX', 'pivotY', 'pivotZ', 'abs_pivotX', 'abs_pivotY', 'abs_pivotZ', ...
+                'prismaticX', 'prismaticY', 'prismaticZ'}
+            ProperSize = 1;
+        otherwise
+            warning('Invalid joint type');
+    end            
+end
 

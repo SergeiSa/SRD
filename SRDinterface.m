@@ -9,7 +9,7 @@ classdef SRDinterface < handle
         FileName_SimulationEngine        = 'datafile_SimulationEngine.mat';
         FileName_InitialPosition         = 'datafile_InitialPosition.mat';
         
-        FileName_visuals_config          = 'datafile_VisualSettings.mat';
+        FileName_visuals_config          = 'datafile_visuals_config.mat';
         
         FileName_AxisLimits              = 'datafile_AxisLimits.mat';
         FileName_ViewAngle               = 'datafile_ViewAngle.mat';
