@@ -34,7 +34,7 @@ Joint.DefaultJointOrientation         = Parser.Results.DefaultJointOrientation;
 
 Joint.ChildLink.Update = @(Input) Update(Joint.ChildLink, Input);
 
-Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
+Joint.ActionUpdate     = @(Input) Update(Joint, Input);
 
     function Update(Link, Input)
         q = Input(Link.Joint.UsedGeneralizedCoordinates);
@@ -66,5 +66,28 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     end
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
