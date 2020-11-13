@@ -3,7 +3,7 @@ Parser = inputParser;
 Parser.FunctionName = 'SRD_get_handler__Constraints_model';
 Parser.addOptional('description', []);
 Parser.addOptional('dof_robot', []);
-Parser.addOptional('dof_Constraint', []);
+% Parser.addOptional('dof_Constraint', []);
 Parser.parse(varargin{:});
 
 description = Parser.Results.description;
@@ -17,7 +17,8 @@ end
 Handler_Constraints = SRDHandler_Constraints();
 Handler_Constraints.State.description = description;
 
-Handler_Constraints.dof_robot = description;
+Handler_Constraints.dof_robot = Parser.Results.dof_robot;
+Handler_Constraints.dof_Constraint = description.dof_task;
 
     
 if Casadi
@@ -27,9 +28,18 @@ if Casadi
     Handler_Constraints.PreSerializationPrepFunction = @PreSerializationPrepFunction;
     
 else
+    if ~isempty(description.Path)
+        current_dir = pwd;
+        cd(description.Path);
+    end
+    
     Handler_Constraints.get_Constraint          = str2func(Handler_Constraints.State.description.FunctionName_Task);
     Handler_Constraints.get_Jacobian            = str2func(Handler_Constraints.State.description.FunctionName_TaskJacobian);
     Handler_Constraints.get_Jacobian_derivative = str2func(Handler_Constraints.State.description.FunctionName_TaskJacobian_derivative);
+    
+    if ~isempty(description.Path)
+        cd(current_dir);
+    end
 end
 
 
@@ -38,11 +48,16 @@ end
         
         import casadi.*
         
-        so_function_name = [Path, Handler_Constraints.State.description.Casadi_cfile_name, '.so'];
+        so_function_name = [Handler_Constraints.State.description.Path, ...
+            Handler_Constraints.State.description.Casadi_cfile_name, '.so'];
         
-        external_Task                    = external(Handler_Constraints.State.description.FunctionName_Task,                so_function_name);
-        external_TaskJacobian            = external(Handler_Constraints.State.description.Function_TaskJacobian,            so_function_name);
-        external_TaskJacobian_derivative = external(Handler_Constraints.State.description.Function_TaskJacobian_derivative, so_function_name);
+        external_Task                    = external(Handler_Constraints.State.description.FunctionName_Task,                    so_function_name);
+        external_TaskJacobian            = external(Handler_Constraints.State.description.FunctionName_TaskJacobian,            so_function_name);
+        external_TaskJacobian_derivative = external(Handler_Constraints.State.description.FunctionName_TaskJacobian_derivative, so_function_name);
+        
+%         external_Task                    = external(Handler_Constraints.State.description.FunctionName_Task,                so_function_name);
+%         external_TaskJacobian            = external(Handler_Constraints.State.description.Function_TaskJacobian,            so_function_name);
+%         external_TaskJacobian_derivative = external(Handler_Constraints.State.description.Function_TaskJacobian_derivative, so_function_name);
         
         
         Handler_Constraints.get_Constraint          = @(q) full(evalf(external_Task(q)));

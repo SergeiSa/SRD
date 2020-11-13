@@ -30,6 +30,7 @@ if ~isempty(Parser.Results.Path)
     end
 end
 
+dof_task = length(Parser.Results.Task);
 
 if SymbolicEngine.Casadi
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,6 +91,7 @@ description.Path  = Parser.Results.Path;
 description.FunctionName_Task                     = Parser.Results.FunctionName_Task;
 description.FunctionName_TaskJacobian             = Parser.Results.FunctionName_TaskJacobian;
 description.FunctionName_TaskJacobian_derivative  = Parser.Results.FunctionName_TaskJacobian_derivative;
+description.dof_task                              = dof_task;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function generation
@@ -100,15 +102,15 @@ description.FunctionName_TaskJacobian_derivative  = Parser.Results.FunctionName_
         
         %generate functions
         disp(['Starting writing function for the ', Parser.Results.FunctionName_Task]);
-        g_InverseKinematics_Task = Function(Parser.Results.FunctionName_Task, ...
+        g_Task = Function(Parser.Results.FunctionName_Task, ...
             {Parser.Results.SymbolicEngine.q}, {Task}, {'q'}, {'Task'});
         
         disp(['Starting writing function for the ', Parser.Results.FunctionName_Task, ' task jacobian']);
-        g_InverseKinematics_TaskJacobian = Function(Parser.Results.FunctionName_TaskJacobian, ...
+        g_TaskJacobian = Function(Parser.Results.FunctionName_TaskJacobian, ...
             {Parser.Results.SymbolicEngine.q}, {TaskJacobian}, {'q'}, {'TaskJacobian'});
         
         disp(['Starting writing function for the derivative of ', Parser.Results.FunctionName_Task, ' task jacobian']);
-        g_InverseKinematics_TaskJacobian_derivative = Function(Parser.Results.FunctionName_TaskJacobian_derivative, ...
+        g_TaskJacobian_derivative = Function(Parser.Results.FunctionName_TaskJacobian_derivative, ...
             {Parser.Results.SymbolicEngine.q, Parser.Results.SymbolicEngine.v}, {TaskJacobian_derivative}, {'q', 'v'}, {'TaskJacobian_derivative'});
         
         
@@ -121,9 +123,9 @@ description.FunctionName_TaskJacobian_derivative  = Parser.Results.FunctionName_
         so_function_name = [Parser.Results.Casadi_cfile_name, '.so'];
         
         CG = CodeGenerator(c_function_name);
-        CG.add(g_InverseKinematics_Task);
-        CG.add(g_InverseKinematics_TaskJacobian);
-        CG.add(g_InverseKinematics_TaskJacobian_derivative);
+        CG.add(g_Task);
+        CG.add(g_TaskJacobian);
+        CG.add(g_TaskJacobian_derivative);
         CG.generate();
         
         command = 'gcc -fPIC -shared ';
