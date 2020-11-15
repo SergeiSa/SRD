@@ -178,7 +178,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             
             
             result = [result; body_obj];
-            joints = [joints; new_joint]
+            joints = [joints; new_joint];
         end
     end
 

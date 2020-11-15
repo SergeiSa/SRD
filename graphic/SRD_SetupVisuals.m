@@ -16,6 +16,8 @@ Parser.addOptional('DrawRobot_Default_LineWidth', 0.5);
 
 Parser.addOptional('DrawRobot_STL_FaceColor', [0.8 0.8 1.0]);
 Parser.addOptional('DrawRobot_STL_EdgeColor', 'none');
+Parser.addOptional('DrawRobot_STL_FaceAlpha', 1');
+Parser.addOptional('DrawRobot_STL_EdgeAlpha', 0);
 Parser.addOptional('DrawRobot_STL_FaceLighting', 'gouraud');
 Parser.addOptional('DrawRobot_STL_AmbientStrength', 0.15);
 Parser.addOptional('DrawRobot_STL_camlight', 'headlight');
@@ -44,6 +46,8 @@ visuals_config.DrawRobot_Default_LineWidth = Parser.Results.DrawRobot_Default_Li
 
 visuals_config.DrawRobot_STL_FaceColor = Parser.Results.DrawRobot_STL_FaceColor;
 visuals_config.DrawRobot_STL_EdgeColor = Parser.Results.DrawRobot_STL_EdgeColor;
+visuals_config.DrawRobot_STL_FaceAlpha = Parser.Results.DrawRobot_STL_FaceAlpha;
+visuals_config.DrawRobot_STL_EdgeAlpha = Parser.Results.DrawRobot_STL_EdgeAlpha;
 visuals_config.DrawRobot_STL_FaceLighting = Parser.Results.DrawRobot_STL_FaceLighting;
 visuals_config.DrawRobot_STL_AmbientStrength = Parser.Results.DrawRobot_STL_AmbientStrength;
 visuals_config.DrawRobot_STL_camlight = Parser.Results.DrawRobot_STL_camlight;

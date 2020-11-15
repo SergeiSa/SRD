@@ -73,13 +73,12 @@ m = length(SymbolicEngine.u);
 if SymbolicEngine.Casadi
     iH = add_iH_variable(n);
     
-    TCq = jacobian(T*u+c, q);
-    TCv = jacobian(T*u+c, v);
+    TCq = jacobian(T*u-c, q);
+    TCv = jacobian(T*u-c, v);
     
     
-    dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u+c)), n, n) + ...
-        TCq;
-    
+    dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u-c)), n, n) + TCq;
+            
     dfdv = iH * TCv;
     
     A = [zeros(n, n), eye(n);
@@ -89,7 +88,7 @@ if SymbolicEngine.Casadi
         iH*T];
     
     linear_c = [zeros(n, 1);
-        iH*c - dfdq*q - dfdv*v];
+                iH*(T*u-c)];
     
     generate_functions_Casadi(A, B, linear_c, iH, Parser);
     description.Casadi_cfile_name = Parser.Results.Casadi_cfile_name;
