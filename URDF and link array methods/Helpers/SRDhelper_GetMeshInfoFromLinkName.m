@@ -48,7 +48,8 @@ function [mesh_path,scale] = SRDhelper_GetMeshInfoFromLinkName(varargin)
                 path = mesh_node.getAttribute('filename');
                 if mesh_node.hasAttribute('scale')
                     scale = mesh_node.getAttribute('scale');
-                    scale = str2double(scale(1));
+                    scale_vals = split(scale.toCharArray')
+                    scale = [str2double(scale_vals{1}),str2double(scale_vals{2}),str2double(scale_vals{3})];
                 end
                 path = char(path(1));
                 break;
