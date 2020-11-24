@@ -2,9 +2,9 @@
 %   ParseSTL models of URDF are parsed or not according to the ParseSTL 
 %   parameter
 
-function result = UP_GetLinkArrayFromURDF(varargin)
+function result = SRD_GetLinkArrayFromURDF(varargin)
     Parser = inputParser;
-    Parser.FunctionName = 'UP_GetLinkArrayFromURDF';
+    Parser.FunctionName = 'SRD_GetLinkArrayFromURDF';
     Parser.addOptional('UrdfFilePath', []);
     Parser.addOptional('ParseSTL', false);
     Parser.parse(varargin{:});
@@ -27,9 +27,6 @@ function result = UP_GetLinkArrayFromURDF(varargin)
     xml = xmlread(UrdfFilePath);
     links = xml.getElementsByTagName('link');
     
-
-    %Create user interfase object for SRD
-    SRD = SRDuserinterface;
     %Create ground link
     result = [SRD_get_Link_Ground()];
     joints = [];
@@ -67,7 +64,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
         RelativeBase = [0; 0; 0];
 
 
-        if length(parent_link)~=0
+        if isempty(parent_link)
             joint_info = body.Joint;
 
             joint_Type = joint_info.Type;
@@ -85,7 +82,6 @@ function result = UP_GetLinkArrayFromURDF(varargin)
             
             joint_name = "none";
             
-
             if strcmp(joint_Type,'floating')   
                     joint_name = 'FloatingBase_6dof';
             else
@@ -119,7 +115,7 @@ function result = UP_GetLinkArrayFromURDF(varargin)
                 end
             end
             
-            orientation_matrix =eye(3);
+            %orientation_matrix =eye(3);
             
             %Extracting the child frame offset from the parent frame
             transform_to_joint = getTransform(robot, homeConfiguration(robot), body.Name, parent_name);
