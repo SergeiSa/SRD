@@ -64,7 +64,7 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
         RelativeBase = [0; 0; 0];
 
 
-        if isempty(parent_link)
+        if ~isempty(parent_link)
             joint_info = body.Joint;
 
             joint_Type = joint_info.Type;
