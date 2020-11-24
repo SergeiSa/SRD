@@ -26,9 +26,19 @@ if Casadi
     Handler_dynamics_Linearized_Model.PreSerializationPrepFunction  = @PreSerializationPrepFunction;
 
 else
+    
+    if ~isempty(description.Path)
+        current_dir = pwd;
+        cd(description.Path);
+    end
+    
     Handler_dynamics_Linearized_Model.get_A = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_A);
     Handler_dynamics_Linearized_Model.get_B = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_B);
     Handler_dynamics_Linearized_Model.get_c = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_c);
+    
+    if ~isempty(description.Path)
+        cd(current_dir);
+    end
 end
 
 
