@@ -53,7 +53,7 @@ switch Parser.Results.Type
 end
 h = [];
 
-for i = 1:length(Parser.Results.AnimationTimeLog)
+for i = 1:length(Parser.Results.AnimationTimeLog)-1
     
     target_time = Parser.Results.AnimationTimeLog(i);
     

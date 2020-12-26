@@ -7,7 +7,7 @@ index = 0;
 if isempty(old_h)
     h.STL = cell(n, 1);
 else
-    if isfield(old_h, STL)
+    if isfield(old_h, 'STL')
         h.STL = old_h.STL;
     else
         h.STL = cell(n, 1);
@@ -24,7 +24,7 @@ for i = 1:n
             continue;
         end
         
-        Vertices = SimulationEngine.LinkArray(i).Mesh.Vertices;
+        Vertices = SimulationEngine.LinkArray(i).Mesh.vertices;
         
         Polygon = struct();
         Polygon.vertices = SimulationEngine.LinkArray(i).AbsoluteOrientation * Vertices'...
@@ -32,7 +32,7 @@ for i = 1:n
         Polygon.vertices = Polygon.vertices';
         
         if isempty(old_h)
-            Polygon.faces = SimulationEngine.LinkArray(i).Mesh.Faces;
+            Polygon.faces = SimulationEngine.LinkArray(i).Mesh.faces;
             
             if isempty(SimulationEngine.LinkArray(i).Color)
                 LinkFaceColor = FaceColor;
