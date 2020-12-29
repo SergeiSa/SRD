@@ -83,13 +83,13 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
         
         n   =  Handler_dynamics_generalized_coordinates_model.dof_control;
         
-        B   =  ones(n,n);
+%         B   =  ones(n,n);
         
 
         
-        Aeq = [H             B               F'                  zeros(n, n);...
-               F             zeros(k1_s,n)   zeros(k1_s,k1_s)    zeros(k1_s, 12);...
-               zeros(n,n)    B               F'                  ones(n, n)];
+        Aeq = [H             T               F'                  zeros(n, n);...
+               F             zeros(k1_s,n)   zeros(k1_s,k1_s)    zeros(k1_s,n);...
+               zeros(n,n)    T               F'                  ones(n, n)];
         
 %         Hessian matrix
         
@@ -101,12 +101,35 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
 
            
 %         For now, no inequality constraint   
-           
-        x = quadprog(P,[],Aeq,beq);
+        A=[zeros(n,n)   ones(n,n)   zeros(n,k1_s)    zeros(n, n);
+           zeros(n,n)   -ones(n,n)   zeros(n,k1_s)    zeros(n, n)];
+        b=200*ones(2*n,1);
+        ub=[];
+        lb=[];
+        x0=[];
+        f=[];
+%         size(A)
+%         size(b)
+        
+        %         options = optimset('Display', 'off');
+        options = optimset('MaxIter',200, 'Display', 'off');
+        
+%   
+% %         x = quadprog(P,[],Aeq,beq); %%%this works but wrong definition
+
+%         x = quadprog(P,f,A,b, Aeq, beq);
+%         x0= ones(42,1);
+        x= quadprog(P,f,[],[],Aeq,beq,lb,ub,x0,options);
+%         size(x)
+%         x
 %         x is decision variables defined as [dde , u, lamda s(slack variable)]
-%         u_optim=x(25:30);
+        u_optim=x(n+1:2*n);
+% %         size(u_optim)
         lambda_optim=x(n*2+1:n*2+k1_s);
-        Handler_NestedQP.u = tau + F'*lambda_optim;
+        s = x(n*2+k1_s+1:end);
+% %         size(u_optim)
+%         Handler_NestedQP.u = T* u_optim+ F'*lambda_optim+s;
+        Handler_NestedQP.u = tau+ F'*lambda_optim+s;
         
         
 
