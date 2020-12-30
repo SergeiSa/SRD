@@ -83,13 +83,13 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
         
         n   =  Handler_dynamics_generalized_coordinates_model.dof_control;
         
-        B   =  ones(n,n);
+%         B   =  ones(n,n);
         
 
         
-        Aeq = [H             B               F'                  zeros(n, n);...
-               F             zeros(k1_s,n)   zeros(k1_s,k1_s)    zeros(k1_s, 12);...
-               zeros(n,n)    B               F'                  ones(n, n)];
+        Aeq = [H             T               F'                  zeros(n, n);...
+               F             zeros(k1_s,n)   zeros(k1_s,k1_s)    zeros(k1_s,n);...
+               zeros(n,n)    T               F'                  ones(n, n)];
         
 %         Hessian matrix
         
@@ -100,13 +100,20 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
         P = blkdiag(ones(n*3,n*3),100*ones(k1_s, k1_s));
 
            
-%         For now, no inequality constraint   
-           
-        x = quadprog(P,[],Aeq,beq);
-%         x is decision variables defined as [dde , u, lamda s(slack variable)]
-%         u_optim=x(25:30);
+
+        ub=[];
+        lb=[];
+        x0=[];
+        f=[];
+        options = optimset('MaxIter',200, 'Display', 'off');
+        
+% %         x = quadprog(P,[],Aeq,beq); %%%this works but wrong definition
+
+        x= quadprog(P,f,[],[],Aeq,beq,lb,ub,x0,options);
+%         u_optim=x(n+1:2*n);
         lambda_optim=x(n*2+1:n*2+k1_s);
-        Handler_NestedQP.u = tau + F'*lambda_optim;
+        s = x(n*2+k1_s+1:end);
+        Handler_NestedQP.u = tau+ F'*lambda_optim+s;
         
         
 
