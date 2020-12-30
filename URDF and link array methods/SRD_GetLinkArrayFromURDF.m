@@ -200,7 +200,7 @@ function ProperSize = GetJointInputsRequirements(JointType)
               'planarX', 'planarY', 'planarZ', ...
               'abs_planarX', 'abs_planarY', 'abs_planarZ'}
             ProperSize = 3;
-        case {'pivotXY', 'pivotYZ', 'pivotZX'}
+        case {'pivotXY', 'pivotYZ', 'pivotZX','pivotXZ'}
             ProperSize = 2;
         case {'pivotX', 'pivotY', 'pivotZ', 'abs_pivotX', 'abs_pivotY', 'abs_pivotZ', ...
                 'prismaticX', 'prismaticY', 'prismaticZ'}
