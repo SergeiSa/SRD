@@ -1,7 +1,7 @@
-function Joint = SRD_get_Joint_PivotX(varargin)
+function Joint = SRD_get_Joint_FloatingBaseEuler_XYZ(varargin)
 
 Parser = inputParser;
-Parser.FunctionName = 'SRD_get_Joint_PivotX';
+Parser.FunctionName = 'SRD_get_Joint_FloatingBaseEuler_XYZ';
 Parser.addOptional('Name', []);
 
 Parser.addOptional('ChildLink', []);
@@ -16,7 +16,7 @@ Parser.parse(varargin{:});
 
 Joint = SRD_Joint;
 
-Joint.Type = 'PivotX';
+Joint.Type = 'FloatingBaseEuler_XYZ';
 
 Joint.Name            = Parser.Results.Name;
 Joint.ChildLink       = Parser.Results.ChildLink;
@@ -39,12 +39,27 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     function Update(Link, Input)
         q = Input(Link.Joint.UsedGeneralizedCoordinates);
         
-        Link.RelativeOrientation =  Link.Joint.DefaultJointOrientation * SRD_RotationMatrix3D_x(q);
+        Tx = SRD_RotationMatrix3D_x(q(1));
+        Ty = SRD_RotationMatrix3D_y(q(2));
+        Tz = SRD_RotationMatrix3D_z(q(3));
         
-        SRD_ForwardKinematics_JointUpdate_RelativeOrientationType(Link);
+        Link.AbsoluteOrientation = Tz*Ty*Tx;
+        
+        Link.AbsoluteBase = [q(4); q(5); q(6)];
+        Link.AbsoluteOrientation = Link.ParentLink.AbsoluteOrientation * Link.RelativeOrientation;
+        
+        rBaseToFollower = Link.RelativeFollower - repmat(Link.RelativeBase, 1, size(Link.RelativeFollower, 2));
+        rBaseToCoM      = Link.RelativeCoM - Link.RelativeBase;
+        
+        Link.AbsoluteFollower = repmat(Link.AbsoluteBase, 1, size(Link.RelativeFollower, 2)) + Link.AbsoluteOrientation*rBaseToFollower;
+        Link.AbsoluteCoM = Link.AbsoluteBase + Link.AbsoluteOrientation*rBaseToCoM;
+        
     end
 
     function generalized_force = ActionUpdate(Joint, Input)
+       
+        error('not implemented!')
+        
         u = Input(Joint.UsedControlInputs);
         
         Child_T = Joint.ChildLink.AbsoluteOrientation;
@@ -66,3 +81,28 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     end
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
