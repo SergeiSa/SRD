@@ -79,10 +79,9 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
                tau];
            
 
-        P = blkdiag(ones(n,n), ones(m,m), ones(k1,k1), 100*ones(n, n));
+        P = blkdiag(ones(n,n), ones(m,m), ones(k1,k1), 200*ones(n, n));
 %         P = blkdiag(ones(n*3,n*3),100*ones(k1, k1));
-        A=[];
-        b= [];
+
 
         ub=[];
         lb=[];
@@ -92,9 +91,9 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
 %         options = optimset('MaxIter',200);
         
 
-        x= quadprog(P,f,A,b,Aeq,beq,lb,ub,x0,options);
+        x= quadprog(P,f,[],[],Aeq,beq,lb,ub,x0,options);
         u_optim=x(n+1:n+m);
-%         lambda_optim=x(n*2+1:n*2+k1);
+        lambda_optim=x(n*2+1:n*2+k1);
         s = x(n+m+k1+1:end);
 %         Handler_NestedQP.u = tau+ F'* lambda_optim+s;
         Handler_NestedQP.u = u_optim;
