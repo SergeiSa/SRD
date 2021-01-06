@@ -55,6 +55,10 @@ if strcmp(Type,'fixed')
     jointConstructor = @SRD_get_Joint_Fixed;
 end
 
+if strcmp(Type,'floating')
+    jointConstructor = @SRD_get_Joint_FloatingBaseEuler_XYZ;
+end
+
 if isempty(jointConstructor)
     error('Invalid joint type');
 end
