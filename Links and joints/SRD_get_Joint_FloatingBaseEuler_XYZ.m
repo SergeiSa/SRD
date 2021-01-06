@@ -43,11 +43,7 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
         Ty = SRD_RotationMatrix3D_y(q(2));
         Tz = SRD_RotationMatrix3D_z(q(3));
         
-<<<<<<< HEAD
         Link.RelativeOrientation = Tz*Ty*Tx;
-=======
-        Link.AbsoluteOrientation = Tz*Ty*Tx;
->>>>>>> 85c308b69b03271da6d7bcaab30d5b64646bcdd5
         
         Link.AbsoluteBase = [q(4); q(5); q(6)];
         Link.AbsoluteOrientation = Link.ParentLink.AbsoluteOrientation * Link.RelativeOrientation;
