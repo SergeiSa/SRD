@@ -79,7 +79,7 @@ Handler_NestedQP.PreSerializationPrepFunction = @PreSerializationPrepFunction;
                tau];
            
 
-        P = blkdiag(ones(n,n), ones(m,m), ones(k1,k1), 100*ones(n, n));
+        P = blkdiag(ones(n,n), ones(m,m), ones(k1,k1), 10*ones(n, n));
 %         P = blkdiag(ones(n*3,n*3),100*ones(k1, k1));
         A=[];
         b= [];
