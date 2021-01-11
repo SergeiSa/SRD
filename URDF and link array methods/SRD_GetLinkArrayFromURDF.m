@@ -129,7 +129,13 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
             if strcmp(joint_Type,'fixed')
                 joint_name = 'fixed';
             end
-
+            
+            joint_urdf_type = split(joint_info.Name,'_')
+            
+            if strcmp(joint_urdf_type(end),'floating')
+                joint_name = 'floating';
+            end
+            
 %             body_obj = SRDLinkWithJoint('JointType',,'Order', body_idx,'FileName', [],...
 %             'LinkParametersStructure', body_struct, 'ParentLink', parent_obj,'ParentFollowerNumber',
 %             size(parent_obj.RelativeFollower,2));%!!!
@@ -194,13 +200,13 @@ function ProperSize = GetJointInputsRequirements(JointType)
     switch JointType
         case {'none', 'fixed'}
             ProperSize = 0;
-        case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX'}
+        case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX','floating'}
             ProperSize = 6;
         case {'abs_spherical', 'prismatic_XYZ', ...
               'planarX', 'planarY', 'planarZ', ...
               'abs_planarX', 'abs_planarY', 'abs_planarZ'}
             ProperSize = 3;
-        case {'pivotXY', 'pivotYZ', 'pivotZX'}
+        case {'pivotXY', 'pivotYZ', 'pivotZX','pivotXZ'}
             ProperSize = 2;
         case {'pivotX', 'pivotY', 'pivotZ', 'abs_pivotX', 'abs_pivotY', 'abs_pivotZ', ...
                 'prismaticX', 'prismaticY', 'prismaticZ'}

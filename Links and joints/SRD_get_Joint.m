@@ -41,9 +41,22 @@ end
 if strcmp(Type,'pivotZ')
     jointConstructor = @SRD_get_Joint_PivotZ;
 end
+if strcmp(Type,'pivotXY')
+    jointConstructor = @SRD_get_Joint_PivotXY;
+end
+if strcmp(Type,'pivotYZ')
+    jointConstructor = @SRD_get_Joint_PivotYZ;
+end
+if strcmp(Type,'pivotXZ')
+    jointConstructor = @SRD_get_Joint_PivotZX;
+end
 
 if strcmp(Type,'fixed')
     jointConstructor = @SRD_get_Joint_Fixed;
+end
+
+if strcmp(Type,'floating')
+    jointConstructor = @SRD_get_Joint_FloatingBaseEuler_XYZ;
 end
 
 if isempty(jointConstructor)

@@ -7,7 +7,7 @@ index = 0;
 if isempty(old_h)
     h.STL = cell(n, 1);
 else
-    if isfield(old_h, STL)
+    if isfield(old_h, 'STL')
         h.STL = old_h.STL;
     else
         h.STL = cell(n, 1);
