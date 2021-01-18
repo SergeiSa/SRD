@@ -1,3 +1,24 @@
+% Derives symbolic expression for a joint space inertial matrix
+% (generalized inertia matrix) - H
+%
+% SymbolicEngine - an object of SRDSymbolicEngine class, with fields: 
+%             .dof (number of gen. coordinates of the system)
+%             .Casadi (true/false - flag, to use Casadi or not)
+%             .LinkArray - array of SRD links 
+%
+%It requires that SRD_generate_second_derivative_Jacobians() had been run
+%before, to prepare SymbolicEngine.LinkArray.
+%
+% NOTES:
+%
+%SymbolicEngine contains symbolic variables and might be difficut to
+%serialized (e.g. if Casadi is used). Same with H.
+%
+% The function uses comparatively slow algorithm based on adding Jacobians
+% for each link (see the code, it is straight-forward), but it is designed
+% to be run once and then generate an optimized callable (.m file for
+% MATLAB, or a .so for Casadi)
+%
 function H = SRD_dynamics_derive_JSIM(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_dynamics_derive_JSIM';
