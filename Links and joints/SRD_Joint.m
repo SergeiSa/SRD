@@ -1,3 +1,8 @@
+%SRD joint class - used to create SRD joint objects, which are used to
+%connect SRD links
+%
+%See documentation for PivotX (SRD_get_Joint_PivotX)
+%
 classdef SRD_Joint < handle
     properties
     

@@ -1,3 +1,11 @@
+%See documentation for PivotX (SRD_get_Joint_PivotX)
+%
+%This link directly assigns Link.AbsoluteBase via gen.coordinates, but
+%allows to set Link.AbsoluteOrientation as a pure function of the 3
+%angles (if the link's parent is Groud or another link with
+%constant orientation) or a function of 3 angles and other gen.
+%coordinates, if the parent had a non-constant orientation
+%
 function Joint = SRD_get_Joint_FloatingBaseEuler_XYZ(varargin)
 
 Parser = inputParser;

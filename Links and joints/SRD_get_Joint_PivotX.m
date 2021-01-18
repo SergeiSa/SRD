@@ -1,3 +1,34 @@
+% Function for getting an SRD Joint - an object, implementing functionality
+% of joints, mainly - forward kinematics (via updates of the absolute
+% orientation of the link, attached to the joint) and control map
+% generation (via ???) 
+%
+% Name - unique ID of the joint
+%
+% ChildLink - (handle of an SRD link) link, attached to the joint.
+%
+% ParentLink - (handle of an SRD link) link, to which the joint is
+% attached.
+%
+% ParentFollowerNumber - (integer) index of the column in the parent link's
+% follower; corresponding follower column will be treated as the point
+% where the joint is attached
+%
+% UsedGeneralizedCoordinates - (integer or array of integers) indicies of
+% the generalized coordinates that are used to update the joint. PivotX has
+% one gen. coordinate that defines the joint angle, while an Euler angle
+% floating body joint would have 6 - 3 position component, 3
+% orientation/Euler angle components.
+%
+% UsedControlInputs - (integer or array of integers) indicies of
+% the control inputs that are used to control the joint. PivotX has
+% one control input that defines the joint torque, while a PivotXY would
+% have two inputs
+%
+% DefaultJointOrientation - (3x3 rotation matrix) orientation offset.
+% The RelativeOrientation field of a link attached to a PivotX is
+% calculated as RO = DefaultJointOrientation * SRD_RotationMatrix3D_x(q)
+%
 function Joint = SRD_get_Joint_PivotX(varargin)
 
 Parser = inputParser;
