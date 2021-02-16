@@ -129,13 +129,7 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
             if strcmp(joint_Type,'fixed')
                 joint_name = 'fixed';
             end
-            
-            joint_urdf_type = split(joint_info.Name,'_')
-            
-            if strcmp(joint_urdf_type(end),'floating')
-                joint_name = 'floating';
-            end
-            
+
 %             body_obj = SRDLinkWithJoint('JointType',,'Order', body_idx,'FileName', [],...
 %             'LinkParametersStructure', body_struct, 'ParentLink', parent_obj,'ParentFollowerNumber',
 %             size(parent_obj.RelativeFollower,2));%!!!
@@ -156,8 +150,8 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
             body_obj.StlPath = MeshPath;
             
             if ~isempty(MeshPath)
-                body_obj.Mesh = matlab.internal.meshio.stlread(MeshPath);
-                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*MeshScale;
+                body_obj.Mesh = stlread(MeshPath);
+                body_obj.Mesh.Vertices = body_obj.Mesh.vertices.*MeshScale;
             end
             
             current_gen_coords = [];
@@ -200,7 +194,7 @@ function ProperSize = GetJointInputsRequirements(JointType)
     switch JointType
         case {'none', 'fixed'}
             ProperSize = 0;
-        case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX','floating'}
+        case {'FloatingBase_6dof', 'FloatingBase_6dof_ZYX'}
             ProperSize = 6;
         case {'abs_spherical', 'prismatic_XYZ', ...
               'planarX', 'planarY', 'planarZ', ...
