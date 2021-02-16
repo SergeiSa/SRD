@@ -1,7 +1,7 @@
-function Joint = SRD_get_Joint_PivotX(varargin)
+function Joint = SRD_get_Joint(varargin)
 
 Parser = inputParser;
-Parser.FunctionName = 'SRD_get_Joint_PivotX';
+Parser.FunctionName = 'SRD_get_Joint';
 Parser.addOptional('Name', []);
 Parser.addOptional('Type', []);
 Parser.addOptional('ChildLink', []);
@@ -33,7 +33,6 @@ jointConstructor = [];
 
 if strcmp(Type,'pivotX')
     jointConstructor = @SRD_get_Joint_PivotX;
-    ProperSize = 1;
 end
 if strcmp(Type,'pivotY')
     jointConstructor = @SRD_get_Joint_PivotY;
