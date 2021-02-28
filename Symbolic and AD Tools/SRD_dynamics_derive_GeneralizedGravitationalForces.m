@@ -15,7 +15,7 @@
 % NOTES:
 %
 %SymbolicEngine contains symbolic variables and might be difficut to
-%serialized (e.g. if Casadi is used). Same with H.
+%serialize (e.g. if Casadi is used). Same with G.
 %
 % The function uses comparatively slow algorithm based on adding Jacobians
 % for each link (see the code, it is straight-forward), but it is designed

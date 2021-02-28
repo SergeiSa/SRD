@@ -58,11 +58,11 @@ end
         Handler_dynamics_generalized_coordinates_model.get_control_map                = @(q)    full(evalf(external_T(q)));
   
     end
-    function PreSerializationPrepFunction(Handler_dynamics_Linearized_Model)
+    function PreSerializationPrepFunction(Handler_dynamics_generalized_coordinates_model)
         
-        Handler_dynamics_Linearized_Model.get_joint_space_inertia_matrix = [];
-        Handler_dynamics_Linearized_Model.get_bais_vector = [];
-        Handler_dynamics_Linearized_Model.get_control_map = [];
+        Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = [];
+        Handler_dynamics_generalized_coordinates_model.get_bais_vector = [];
+        Handler_dynamics_generalized_coordinates_model.get_control_map = [];
         
     end
 

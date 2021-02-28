@@ -34,7 +34,7 @@ else
     
     Handler_dynamics_Linearized_Model.get_A = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_A);
     Handler_dynamics_Linearized_Model.get_B = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_B);
-    Handler_dynamics_Linearized_Model.get_c = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_c);
+%     Handler_dynamics_Linearized_Model.get_c = str2func(Handler_dynamics_Linearized_Model.State.description.FunctionName_c);
     
     if ~isempty(description.Path)
         cd(current_dir);
@@ -49,7 +49,7 @@ end
         
         external_A = external(Handler_dynamics_Linearized_Model.State.description.FunctionName_A, so_function_name);
         external_B = external(Handler_dynamics_Linearized_Model.State.description.FunctionName_B, so_function_name);
-        external_c = external(Handler_dynamics_Linearized_Model.State.description.FunctionName_c, so_function_name);
+%         external_c = external(Handler_dynamics_Linearized_Model.State.description.FunctionName_c, so_function_name);
                
         Handler_dynamics_Linearized_Model.get_A = @(q, v, u, iH) full(evalf(external_A(q, v, u, iH)));
         Handler_dynamics_Linearized_Model.get_B = @(q, v,    iH) full(evalf(external_B(q, v,    iH)));
@@ -60,7 +60,7 @@ end
         
         Handler_dynamics_Linearized_Model.get_A = [];
         Handler_dynamics_Linearized_Model.get_B = [];
-        Handler_dynamics_Linearized_Model.get_c = [];
+%         Handler_dynamics_Linearized_Model.get_c = [];
         
     end
 

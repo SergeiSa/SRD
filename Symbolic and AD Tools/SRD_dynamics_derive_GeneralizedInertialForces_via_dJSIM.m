@@ -1,4 +1,4 @@
-% Derives symbolic expression for a generalized inertia matrix - H
+% Derives symbolic expression for a generalized inertial forces - in
 %
 % SymbolicEngine - an object of SRDSymbolicEngine class, with fields: 
 %             .dof (number of gen. coordinates of the system)
@@ -17,7 +17,7 @@
 % NOTES:
 %
 %SymbolicEngine contains symbolic variables and might be difficut to
-%serialized (e.g. if Casadi is used). Same with H.
+%serialize (e.g. if Casadi is used). Same with in.
 %
 % The function runs faster than Christoffel symbol method, but does not
 % return C matrix in the H*ddq + C*dq + g = u form of the dynamics equations 
