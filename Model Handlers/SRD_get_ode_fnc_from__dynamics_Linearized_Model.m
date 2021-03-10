@@ -36,7 +36,7 @@ ode_fnc_handle = @(t, x) ode_fnc(t, x, ...
         u = -K*(x - x_desired) + u_desired;
         
         q = x(1:n);
-        v = x((n+1):n);
+        v = x((n+1):(2*n));
         
         q_desired = x_desired(1:n);
         v_desired = x_desired((n+1):(2*n));
