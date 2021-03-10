@@ -1,3 +1,4 @@
+%See documentation for PivotX (SRD_get_Joint_PivotX)
 function Joint = SRD_get_Joint_PivotXY(varargin)
 
 Parser = inputParser;

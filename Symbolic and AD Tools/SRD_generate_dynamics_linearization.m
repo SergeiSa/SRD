@@ -87,10 +87,11 @@ if SymbolicEngine.Casadi
     B = [zeros(n, m);
         iH*T];
     
-    linear_c = [zeros(n, 1);
-                iH*(T*u-c)];
+%     linear_c = [zeros(n, 1);
+%                 iH*(T*u-c)];
     
-    generate_functions_Casadi(A, B, linear_c, iH, Parser);
+%     generate_functions_Casadi(A, B, linear_c, iH, Parser);
+    generate_functions_Casadi(A, B, iH, Parser);
     description.Casadi_cfile_name = Parser.Results.Casadi_cfile_name;
 else
     tic
@@ -120,24 +121,25 @@ else
     B = [zeros(n, m); 
          iH*T];
      
-    linear_c = [zeros(n, 1); 
-                iH*c - dfdq*q - dfdv*v];
+%     linear_c = [zeros(n, 1); 
+%                 iH*c - dfdq*q - dfdv*v];
             
     disp('Simplifying A');
     A = simplify(A); 
     disp('Simplifying B');
     B = simplify(B); 
-    disp('Simplifying linear_c');
-    linear_c = simplify(linear_c); 
+%     disp('Simplifying linear_c');
+%     linear_c = simplify(linear_c); 
     
-    generate_functions_symbolic(A, B, linear_c, iH, Parser);
+%     generate_functions_symbolic(A, B, linear_c, iH, Parser);
+    generate_functions_symbolic(A, B, iH, Parser);
     toc
 end    
             
 description.Path  = Parser.Results.Path;
 description.FunctionName_A  = Parser.Results.FunctionName_A;
 description.FunctionName_B  = Parser.Results.FunctionName_B;
-description.FunctionName_c  = Parser.Results.FunctionName_c;
+% description.FunctionName_c  = Parser.Results.FunctionName_c;
 
 description.dof_configuration_space_robot = n;
 description.dof_state_space_robot = 2*n;
@@ -154,7 +156,8 @@ disp('* Linearization finished');
         iH = SX.sym('iH', [dof, dof]);        
     end
 
-    function generate_functions_Casadi(A, B, linear_c, iH, Parser)
+%     function generate_functions_Casadi(A, B, linear_c, iH, Parser)
+    function generate_functions_Casadi(A, B, iH, Parser)
         import casadi.*
         
         %generate functions
@@ -173,13 +176,13 @@ disp('* Linearization finished');
              iH}, ...
             {B}, {'q', 'v', 'iH'}, {'B'});
         
-        disp(['Starting writing function for the ', Parser.Results.FunctionName_c]);
-        g_linearization_c = Function(Parser.Results.FunctionName_c, ...
-            {Parser.Results.SymbolicEngine.q, ...
-             Parser.Results.SymbolicEngine.v, ...
-             Parser.Results.SymbolicEngine.u, ...
-             iH}, ...
-            {linear_c}, {'q', 'v', 'u', 'iH'}, {'c'});
+%         disp(['Starting writing function for the ', Parser.Results.FunctionName_c]);
+%         g_linearization_c = Function(Parser.Results.FunctionName_c, ...
+%             {Parser.Results.SymbolicEngine.q, ...
+%              Parser.Results.SymbolicEngine.v, ...
+%              Parser.Results.SymbolicEngine.u, ...
+%              iH}, ...
+%             {linear_c}, {'q', 'v', 'u', 'iH'}, {'c'});
         
         if ~isempty(Parser.Results.Path)
             current_dir = pwd;
@@ -192,7 +195,7 @@ disp('* Linearization finished');
         CG = CodeGenerator(c_function_name);
         CG.add(g_linearization_A);
         CG.add(g_linearization_B);
-        CG.add(g_linearization_c);
+%         CG.add(g_linearization_c);
         CG.generate();
         
         command = 'gcc -fPIC -shared ';
@@ -214,7 +217,8 @@ disp('* Linearization finished');
     end
 
 
-    function generate_functions_symbolic(A, B, linear_c, iH, Parser)
+%     function generate_functions_symbolic(A, B, linear_c, iH, Parser)
+    function generate_functions_symbolic(A, B, iH, Parser)
 
         FileName_A = [Parser.Results.Path, Parser.Results.FunctionName_A];
         FileName_B = [Parser.Results.Path, Parser.Results.FunctionName_B];
@@ -235,13 +239,13 @@ disp('* Linearization finished');
                      iH}, ...
             'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
-        disp(['Starting writing function ', FileName_c]);
-        matlabFunction(linear_c, 'File', FileName_c, ...
-            'Vars', {Parser.Results.SymbolicEngine.q, ...
-                     Parser.Results.SymbolicEngine.v, ...
-                     Parser.Results.SymbolicEngine.u, ...
-                     iH}, ...
-                     'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
+%         disp(['Starting writing function ', FileName_c]);
+%         matlabFunction(linear_c, 'File', FileName_c, ...
+%             'Vars', {Parser.Results.SymbolicEngine.q, ...
+%                      Parser.Results.SymbolicEngine.v, ...
+%                      Parser.Results.SymbolicEngine.u, ...
+%                      iH}, ...
+%                      'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
         disp('* Finished generating functions'); disp(' ')
     end

@@ -2,8 +2,8 @@ function SRD__animate__vanilla(varargin)
 
 Parser = inputParser;
 Parser.FunctionName = 'SRD__animate__vanilla';
-Parser.addOptional('Handler_Simulation', []);
-Parser.addOptional('Handler_Logger', []);
+Parser.addOptional('TimeLog', []);
+Parser.addOptional('PositionLog', []);
 Parser.addOptional('AnimationTimeLog', []);
 
 Parser.addOptional('Type', 'Default'); %'Default', 'STL', 'Custom'
@@ -57,9 +57,9 @@ for i = 1:length(Parser.Results.AnimationTimeLog)
     
     target_time = Parser.Results.AnimationTimeLog(i);
     
-    [~, index] = min(abs(Parser.Results.Handler_Simulation.TimeLog - target_time));
+    [~, index] = min(abs(Parser.Results.TimeLog - target_time));
     
-    q = Parser.Results.Handler_Logger.Log.q(index, :)';
+    q = Parser.Results.PositionLog(index, :)';
     
     [az, el] = view; %remember the user-set view
     

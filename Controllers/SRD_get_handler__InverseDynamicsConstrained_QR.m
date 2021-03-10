@@ -51,6 +51,9 @@ Handler_InverseDynamics.PreSerializationPrepFunction = @PreSerializationPrepFunc
         
         F = Handler_Constraints_Model.get_Jacobian(desired_q);
         
+        F = orth(F');
+        F = F';
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % %
         

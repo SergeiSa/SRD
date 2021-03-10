@@ -1,3 +1,6 @@
+%See documentation for PivotX (SRD_get_Joint_PivotX)
+%
+%This joint is used to weld the link to the previous one
 function Joint = SRD_get_Joint_Fixed(varargin)
 
 Parser = inputParser;

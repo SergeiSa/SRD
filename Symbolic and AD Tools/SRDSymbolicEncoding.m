@@ -1,4 +1,4 @@
-%This class stores info over teh use gneneralized coordinates and alike
+%This class stores info over the use generalized coordinates and alike
 classdef SRDSymbolicEncoding < SRD_Chain
     properties
             
