@@ -16,7 +16,7 @@ k = Parser.Results.Handler_Constraints_Model.dof_Constraint;
 if ~isempty(Parser.Results.new_dimentions)
     nn = Parser.Results.new_dimentions;
 else
-    nn = n - k;
+    nn = n -2*k;
 end
     
 
@@ -36,10 +36,17 @@ for i = 1:Count
     dFdq = Parser.Results.Handler_Constraints_Model.get_Jacobian_derivative(q, v);
     
     G = [zeros(k, n/2), F; F, dFdq];
+    
+    
     N = null(G);
     
-    G_table(:, :, i) = G;
+%     if isempty(N)
+%         N_table(:, :, i)= zeros(n, nn, 1);
+%     else 
     N_table(:, :, i) = N;
+%     end
+    
+    G_table(:, :, i) = G;
     F_table(:, :, i) = [zeros(n/2, k); iH * F'];
 end
 
