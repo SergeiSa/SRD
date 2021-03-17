@@ -1,4 +1,4 @@
-function IK_Table = SRD_InverseKinematics_GenerateTable_ode(varargin)
+function [IK_Table,dq] = SRD_InverseKinematics_GenerateTable_ode(varargin)
 
 %Generate IK table base on Ode integration on dq
 % Available Methode :
@@ -17,6 +17,7 @@ Parser.addOptional('method', @SRD_InversePositionProblemSolver_Ode_Dynamics);
 
 Parser.parse(varargin{:});
 
+dof_robot = Parser.Results.Handler_IK_Model.dof_robot;
 q0 = Parser.Results.InitialGuess;
 J = Parser.Results.Handler_IK_Model.get_Jacobian_handle;
 tspan = Parser.Results.TimeTable;
@@ -24,7 +25,13 @@ tspan = Parser.Results.TimeTable;
 
 [t,IK_Table] = ode45(@(t,q0)sys_ode(t,q0,Parser,J),tspan,q0);
 
-% a= sys_ode(q,q0,Parser,J)
+dq = zeros(length(tspan),dof_robot);
+for i = 1:length(tspan)
+    dq(i,:) = sys_ode(tspan(i),IK_Table(i,:),Parser,J);
+end
+
+% a= sys_ode(0,q0,Parser,J)
+
     function dq = sys_ode(t,q0,Parser,J)
         K = 1; U=1;
         desired_task = Parser.Results.Task_params(:,1);

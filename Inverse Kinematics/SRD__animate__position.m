@@ -61,9 +61,9 @@ for i = 1:length(Parser.Results.Handler_Simulation.TimeLog)
     
     target_time = Parser.Results.Handler_Simulation.TimeLog(i);
     
-    [~, index] = min(abs(Parser.Results.Handler_Simulation.TimeLog - target_time));
+%     [~, index] = min(abs(Parser.Results.Handler_Simulation.TimeLog - target_time));
     
-    q = Parser.Results.Handler_Logger_position.get_position(target_time)'
+    q = Parser.Results.Handler_Logger_position.get_position(target_time)';
     
     [az, el] = view; %remember the user-set view
     
