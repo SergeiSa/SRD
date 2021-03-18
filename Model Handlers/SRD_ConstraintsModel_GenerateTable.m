@@ -16,7 +16,7 @@ k = Parser.Results.Handler_Constraints_Model.dof_Constraint;
 if ~isempty(Parser.Results.new_dimentions)
     nn = Parser.Results.new_dimentions;
 else
-    nn = n - k;
+    nn = n -2* k;
 end
     
 
