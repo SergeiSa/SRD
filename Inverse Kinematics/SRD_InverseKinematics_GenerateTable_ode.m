@@ -9,6 +9,7 @@ function [IK_Table,dq] = SRD_InverseKinematics_GenerateTable_ode(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_InverseKinematics_GenerateTable_ode';
 Parser.addOptional('Task_params', []);
+Parser.addOptional('Wieght', []);
 Parser.addOptional('Handler_IK_Model', []);
 Parser.addOptional('InitialGuess', []);
 Parser.addOptional('TimeTable', []);
@@ -33,7 +34,8 @@ end
 % a= sys_ode(0,q0,Parser,J)
 
     function dq = sys_ode(t,q0,Parser,J)
-        K = 1; U=1;
+        K = Parser.Results.Wieght(1);
+        U = Parser.Results.Wieght(2);
         desired_task = Parser.Results.Task_params(:,1);
         obs_pose = Parser.Results.Task_params(:,2);
         
