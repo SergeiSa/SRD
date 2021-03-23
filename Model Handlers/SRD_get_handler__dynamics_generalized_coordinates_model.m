@@ -33,7 +33,7 @@ else
     
     %H*ddq + c = T*u
     Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = str2func(description.FunctionName_H);
-    Handler_dynamics_generalized_coordinates_model.get_bais_vector = str2func(description.FunctionName_c);
+    Handler_dynamics_generalized_coordinates_model.get_bias_vector = str2func(description.FunctionName_c);
     Handler_dynamics_generalized_coordinates_model.get_control_map = str2func(description.FunctionName_T);
     
     if ~isempty(description.Path)
@@ -54,14 +54,14 @@ end
         
         %H*ddq + c = T*u       
         Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = @(q)    full(evalf(external_H(q)));
-        Handler_dynamics_generalized_coordinates_model.get_bais_vector                = @(q, v) full(evalf(external_c(q, v)));
+        Handler_dynamics_generalized_coordinates_model.get_bias_vector                = @(q, v) full(evalf(external_c(q, v)));
         Handler_dynamics_generalized_coordinates_model.get_control_map                = @(q)    full(evalf(external_T(q)));
   
     end
     function PreSerializationPrepFunction(Handler_dynamics_generalized_coordinates_model)
         
         Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix = [];
-        Handler_dynamics_generalized_coordinates_model.get_bais_vector = [];
+        Handler_dynamics_generalized_coordinates_model.get_bias_vector = [];
         Handler_dynamics_generalized_coordinates_model.get_control_map = [];
         
     end

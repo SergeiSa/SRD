@@ -13,7 +13,7 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         %H*ddq + c = T*u
         joint_space_inertia_matrix;
         joint_space_inertia_matrix_inverse;
-        bais_vector;
+        bias_vector;
         control_map;
     end
     methods
@@ -24,7 +24,7 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
             v = squized(:, 2);
             
             obj.joint_space_inertia_matrix = obj.Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(q);
-            obj.bais_vector                = obj.Handler_dynamics_generalized_coordinates_model.get_bais_vector(q, v);
+            obj.bias_vector                = obj.Handler_dynamics_generalized_coordinates_model.get_bias_vector(q, v);
             obj.control_map                = obj.Handler_dynamics_generalized_coordinates_model.get_control_map(q);
             
             if obj.UsePinv
@@ -40,8 +40,8 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         function H = get_joint_space_inertia_matrix(obj, ~)
             H = obj.joint_space_inertia_matrix;
         end
-        function c = get_bais_vector(obj, ~, ~)
-            c = obj.bais_vector;
+        function c = get_bias_vector(obj, ~, ~)
+            c = obj.bias_vector;
         end
         function T = get_control_map(obj, ~)
             T = obj.control_map;
