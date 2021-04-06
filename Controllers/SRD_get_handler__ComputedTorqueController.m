@@ -42,6 +42,8 @@ Handler_ComputedTorqueController.PreSerializationPrepFunction = @PreSerializatio
         desired = Handler_ControlInput.get_position_velocity_acceleration(t);
         desired_q = desired(:, 1);
         desired_v = desired(:, 2);
+        desired_a = desired(:, 3);
+        
         
         H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(Handler_State.q);
         T = Handler_dynamics_generalized_coordinates_model.get_control_map(Handler_State.q);

@@ -29,6 +29,7 @@ classdef SRDHandler_dynamics_Linear_model_evaluator < SRDHandler
             q = squized(:, 1);
             v = squized(:, 2);
             
+
             u = obj.Handler_Controller.u;
             
             %H*ddq + c = T*u

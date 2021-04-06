@@ -156,8 +156,8 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
             body_obj.StlPath = MeshPath;
             
             if ~isempty(MeshPath)
-                body_obj.Mesh = matlab.internal.meshio.stlread(MeshPath);
-                body_obj.Mesh.Vertices = body_obj.Mesh.Vertices.*MeshScale;
+                body_obj.Mesh = stlread(MeshPath);
+                body_obj.Mesh.vertices = body_obj.Mesh.vertices.*MeshScale;
             end
             
             current_gen_coords = [];

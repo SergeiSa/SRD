@@ -36,7 +36,9 @@ Handler_InverseDynamics.PreSerializationPrepFunction = @PreSerializationPrepFunc
         desired_a = desired(:, 3);
         
         H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(desired_q);
+        
         T = Handler_dynamics_generalized_coordinates_model.get_control_map(desired_q);
+       
         c = Handler_dynamics_generalized_coordinates_model.get_bais_vector(desired_q, desired_v);
        
         u = pinv(T)* (H*desired_a + c);
