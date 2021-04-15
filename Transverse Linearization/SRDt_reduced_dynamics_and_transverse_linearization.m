@@ -1,4 +1,4 @@
-function description = SRDt_reduced_dynamics_transverse_linearization(varargin)
+function description = SRDt_reduced_dynamics_and_transverse_linearization(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_transverse_linearization';
 % Parser.addOptional('SymbolicEngine', []);
