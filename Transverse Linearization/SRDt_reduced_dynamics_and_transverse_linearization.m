@@ -17,8 +17,8 @@ Parser.addOptional('FunctionName_beta', 'get_beta');
 Parser.addOptional('FunctionName_gamma', 'get_gamma');
 
 
-Parser.addOptional('FunctionName_U', 'get_U_ff');
-Parser.addOptional('FunctionName_N', 'get_N');
+Parser.addOptional('FunctionName_Uff', 'get_U_ff');
+Parser.addOptional('FunctionName_Nff', 'get_N');
 Parser.addOptional('FunctionName_A', 'get_A_transv');
 Parser.addOptional('FunctionName_B', 'get_B_transv');
 
@@ -45,6 +45,23 @@ if ~isempty(Parser.Results.Path)
     end
 end
 
+
+description.Path  = Parser.Results.Path;
+description.FunctionName_alpha  = Parser.Results.FunctionName_alpha;
+description.FunctionName_beta  = Parser.Results.FunctionName_beta;
+description.FunctionName_gamma  = Parser.Results.FunctionName_gamma;
+description.FunctionName_Uff  = Parser.Results.FunctionName_Uff;
+description.FunctionName_Nff  = Parser.Results.FunctionName_Nff;
+description.FunctionName_A  = Parser.Results.FunctionName_A;
+description.FunctionName_B  = Parser.Results.FunctionName_B;
+
+description.N_dof  = Parser.Results.N_dof;
+description.c0 = Parser.Results.c0;
+description.H0 = Parser.Results.H0;
+
+
+
+
 N_dof = Parser.Results.N_dof;
 c0 = Parser.Results.c0;
 H0 = Parser.Results.H0;
@@ -52,12 +69,8 @@ H0 = Parser.Results.H0;
 % in this script I derive the transverse dynamics for the case when
 % the motion generator is the linear combination of generalized coordinates
 
-run_sanity_checks = 1;
+run_sanity_checks = 1; %Comparison of reduced dynamics derived in two ways
 
-% % path to urdf file
-% path_to_urdf = 'pendubot_description/planar_manip.urdf';
-% % create pendubot instance
-% robot = Pendubot(path_to_urdf); % pendubot instance
 
 % create symbolic variabes
 % ---------------------------------------------------------------------
@@ -114,6 +127,10 @@ FileName_beta = [Parser.Results.Path, Parser.Results.FunctionName_beta];
 FileName_gamma = [Parser.Results.Path, Parser.Results.FunctionName_gamma];
         
         
+handler_alpha = matlabFunction(alpha, 'Vars', {Phi, Phi_prm});
+handler_beta = matlabFunction(beta, 'Vars', {Phi, Phi_prm, Phi_2prm});
+handler_gamma = matlabFunction(gamma, 'Vars', {Phi});
+
 matlabFunction(alpha, 'File', FileName_alpha, 'Vars', {Phi, Phi_prm});
 matlabFunction(beta, 'File', FileName_beta, 'Vars', {Phi, Phi_prm, Phi_2prm});
 matlabFunction(gamma, 'File', FileName_gamma, 'Vars', {Phi});
@@ -164,12 +181,12 @@ beta = 0.5*simplify(diff(diff(s_abg, s_dot), s_dot));
 gamma = subs(s_abg, [s_dot; s_2dot], zeros(2,1));
 
 if run_sanity_checks
-    alpha2 = get_alpha([H0;c0]\[phi;s], ...
+    alpha2 = handler_alpha([H0;c0]\[phi;s], ...
                              [H0;c0]\[phi_prm;1]);
-    beta2 = get_beta([H0;c0]\[phi;s], ...
+    beta2 = handler_beta([H0;c0]\[phi;s], ...
                            [H0;c0]\[phi_prm;1], ...
                            [H0;c0]\[phi_2prm;0]);
-    gamma2 = get_gamma([H0;c0]\[phi;s]);
+    gamma2 = handler_gamma([H0;c0]\[phi;s]);
 
     assert(double(simplify(alpha - alpha2)) == 0);
     assert(double(simplify(beta - beta2)) == 0);
@@ -235,8 +252,8 @@ A = simplify(subs(A,s_2dot,(-beta*s_dot^2 - gamma)/alpha));
 
 % Generate functions
 % -------------------------------------------------------------------
-FileName_U = [Parser.Results.Path, Parser.Results.FunctionName_U];
-FileName_N = [Parser.Results.Path, Parser.Results.FunctionName_N];
+FileName_U = [Parser.Results.Path, Parser.Results.FunctionName_Uff];
+FileName_N = [Parser.Results.Path, Parser.Results.FunctionName_Nff];
 FileName_A = [Parser.Results.Path, Parser.Results.FunctionName_A];
 FileName_B = [Parser.Results.Path, Parser.Results.FunctionName_B];
         

@@ -1,4 +1,4 @@
-classdef VirtualConstraint
+classdef SRDt_VirtualConstraint
    properties
        Ndof {mustBePositive}
        degree {mustBeNumeric, mustBePositive}
@@ -8,7 +8,7 @@ classdef VirtualConstraint
    end
    
    methods
-       function obj = VirtualConstraint(Ndof, degree, type, c0, H0) % constructor of the class
+       function obj = SRDt_VirtualConstraint(Ndof, degree, type, c0, H0) % constructor of the class
            obj.Ndof = Ndof; % number of DoF
            obj.degree = degree; % degree of virtual constraints polynomials
            obj.type = type; % type of virtual constraint
