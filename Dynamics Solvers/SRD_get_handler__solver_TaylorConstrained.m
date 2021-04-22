@@ -41,7 +41,7 @@ Handler_solver_TaylorConstrained.PreSerializationPrepFunction = @PreSerializatio
         
         H = Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(q);
         T = Handler_dynamics_generalized_coordinates_model.get_control_map(q);
-        c = Handler_dynamics_generalized_coordinates_model.get_bais_vector(q, v);
+        c = Handler_dynamics_generalized_coordinates_model.get_bias_vector(q, v);
         
         F  = Handler_Constraints_Model.get_Jacobian(q);
         dF = Handler_Constraints_Model.get_Jacobian_derivative(q, v);
