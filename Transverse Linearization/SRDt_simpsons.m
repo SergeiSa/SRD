@@ -1,4 +1,4 @@
-function I = simpsons(f,a,b,n)
+function I = SRDt_simpsons(f,a,b,n)
 % This function computes the integral "I" via Simpson's rule in the interval [a,b] with n+1 equally spaced points
 % 
 % Syntax: I = simpsons(f,a,b,n)

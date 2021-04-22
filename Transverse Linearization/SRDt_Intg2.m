@@ -1,4 +1,4 @@
-function I = Intg2(s, s_d, s_0, s_d0, p, vrtlCnstr)
+function I = SRDt_Intg2(s, s_d, s_0, s_d0, p, vrtlCnstr)
 % Function computes integral of the motion
 if s == s_0
     I = s_d^2 - s_d0^2;
