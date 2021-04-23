@@ -1,4 +1,4 @@
-function  [s_str, sd_str, q_str, qd_str, qdd_str, T, A, B] = SRDt_get_nominal_trajectory(varargin)
+function  obj = SRDt_get_nominal_trajectory(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'get_nominal_trajectory';
     Parser.addOptional('Handler_reduced_dynamics_and_transverse_linearization', []);
@@ -31,42 +31,42 @@ function  [s_str, sd_str, q_str, qd_str, qdd_str, T, A, B] = SRDt_get_nominal_tr
         vrtl_cnstr.Phi_2prm(x(1), p), h), tspan, x0, optns);
 
     [~,locs] = findpeaks(x(:,1));
-    T = t(locs(1)); 
+    obj.T = t(locs(1)); 
     T_ind = locs(1);    
     
-    s_str = x(1:T_ind,1);
-    sd_str = x(1:T_ind,2);
+    obj.s = x(1:T_ind,1);
+    obj.sd = x(1:T_ind,2);
     
-    sdd_str = zeros(T_ind,1);
+    obj.sdd = zeros(T_ind,1);
 
-    for i=1:length(T_ind)
-        sdd_str(i) = -1/h.get_alpha(vrtl_cnstr.Phi(x(i,1), p), vrtl_cnstr.Phi_prm(x(i,1), p))*...
+    for i=1:T_ind
+        obj.sdd(i) = -1/h.get_alpha(vrtl_cnstr.Phi(x(i,1), p), vrtl_cnstr.Phi_prm(x(i,1), p))*...
                   (h.get_gamma(vrtl_cnstr.Phi(x(i,1), p)) + ...
                   h.get_beta(vrtl_cnstr.Phi(x(i,1), p), vrtl_cnstr.Phi_prm(x(i,1), p), ...
                   vrtl_cnstr.Phi_2prm(x(i,1), p))*x(i,2)^2);
     end
 
-    q_str = zeros(2, T_ind);
-    qd_str = zeros(2, T_ind);
-    qdd_str = zeros(2, T_ind);
+    obj.q = zeros(2, T_ind);
+    obj.qd = zeros(2, T_ind);
+    obj.qdd = zeros(2, T_ind);
     for i = 1:T_ind
-        q_str(:,i) = vrtl_cnstr.Phi(s_str(i), p);
-        qd_str(:,i) = vrtl_cnstr.Phi_prm(s_str(i), p)*sd_str(i);
-        qdd_str(:,i) = vrtl_cnstr.Phi_2prm(s_str(i), p)*sd_str(i)^2 + ...
-            vrtl_cnstr.Phi_prm(s_str(i), p)*sdd_str(i);
+        obj.q(:,i) = vrtl_cnstr.Phi(obj.s(i), p);
+        obj.qd(:,i) = vrtl_cnstr.Phi_prm(obj.s(i), p)*obj.sd(i);
+        obj.qdd(:,i) = vrtl_cnstr.Phi_2prm(obj.s(i), p)*obj.sd(i)^2 + ...
+            vrtl_cnstr.Phi_prm(obj.s(i), p)*obj.sdd(i);
     end
 
-    A = zeros(  2*h.N_dof-1,2*h.N_dof-1,length(s_str));
-    B = zeros(2*h.N_dof-1,h.N_dof-1,length(s_str));
+    obj.A = zeros(2*h.N_dof-1,2*h.N_dof-1,length(obj.s));
+    obj.B = zeros(2*h.N_dof-1,h.N_dof-1,length(obj.s));
 
-    for i = 1:length(s_str)
-        s_i = s_str(i);
-        sd_i = sd_str(i);
+    for i = 1:T_ind
+        s_i = obj.s(i);
+        sd_i = obj.sd(i);
         phi_i = h.H0*vrtl_cnstr.Phi(s_i, p);
         phi_prm_i = h.H0*vrtl_cnstr.Phi_prm(s_i, p);
         phi_2prm_i = h.H0*vrtl_cnstr.Phi_2prm(s_i, p);
-        A(:,:,i) = h.get_A(s_i,sd_i,phi_i,phi_prm_i,phi_2prm_i);
-        B(:,:,i) = h.get_B(s_i,sd_i,phi_i,phi_2prm_i);
+        obj.A(:,:,i) = h.get_A(s_i,sd_i,phi_i,phi_prm_i,phi_2prm_i);
+        obj.B(:,:,i) = h.get_B(s_i,sd_i,phi_i,phi_2prm_i);
     end
     
     function z_dot = reduced_dynamics_ode(t, z, Phi, Phi_prm, Phi_2prm, h)
