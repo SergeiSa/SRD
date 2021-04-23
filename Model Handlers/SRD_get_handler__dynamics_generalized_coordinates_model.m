@@ -22,7 +22,6 @@ Handler_dynamics_generalized_coordinates_model.dof_control                   = d
 Handler_dynamics_generalized_coordinates_model.SerializationPrepNeeded = true;
 Handler_dynamics_generalized_coordinates_model.PreSerializationPrepFunction  = @PreSerializationPrepFunction;
 if Casadi
-    
     Handler_dynamics_generalized_coordinates_model.PostSerializationPrepFunction = @PostSerializationPrepFunction_casadi;
 else
     Handler_dynamics_generalized_coordinates_model.PostSerializationPrepFunction = @PostSerializationPrepFunction_m;
