@@ -31,7 +31,7 @@ for i = 1:Count
     H = Parser.Results.Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix(q);
     iH = Parser.Results.Handler_dynamics_generalized_coordinates_model.get_joint_space_inertia_matrix_inverse(q);
     T = Parser.Results.Handler_dynamics_generalized_coordinates_model.get_control_map(q);
-    c = Parser.Results.Handler_dynamics_generalized_coordinates_model.get_bais_vector(q, v);
+    c = Parser.Results.Handler_dynamics_generalized_coordinates_model.get_bias_vector(q, v);
     
     u = pinv(T)* (H*a + c);
     
