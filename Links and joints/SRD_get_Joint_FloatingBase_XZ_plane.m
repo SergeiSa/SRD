@@ -47,9 +47,9 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     function Update(Link, Input)
         q = Input(Link.Joint.UsedGeneralizedCoordinates);
         
-        Link.RelativeOrientation = SRD_RotationMatrix3D_y(q(1));
+        Link.RelativeOrientation = SRD_RotationMatrix3D_y(q(3));
         
-        Link.AbsoluteBase = [q(2); 0; q(3)];
+        Link.AbsoluteBase = [q(1); 0; q(2)];
         Link.AbsoluteOrientation = Link.ParentLink.AbsoluteOrientation * Link.RelativeOrientation;
         
         rBaseToFollower = Link.RelativeFollower - repmat(Link.RelativeBase, 1, size(Link.RelativeFollower, 2));
@@ -61,8 +61,7 @@ Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
     end
 
     function generalized_force = ActionUpdate(Joint, Input)
-       
-
+        
     end
 
 end
