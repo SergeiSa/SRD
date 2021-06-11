@@ -77,15 +77,19 @@ if SymbolicEngine.Casadi
     TCv = jacobian(T*u-c, v);
     
     
-    dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u-c)), n, n) + TCq;
+    dfdq = -iH*SRD_matrixjacobian_times_vector(H, q, iH*(T*u-c)) ...
+        + iH*TCq;
+%     dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u-c)), n, n) ...
+%         + iH*TCq;
+    
             
     dfdv = iH * TCv;
     
     A = [zeros(n, n), eye(n);
-        dfdq,        dfdv];
+         dfdq,        dfdv];
     
     B = [zeros(n, m);
-        iH*T];
+         iH*T];
     
 %     linear_c = [zeros(n, 1);
 %                 iH*(T*u-c)];
@@ -97,17 +101,20 @@ else
     tic
     iH = sym('iH', [n, n]);
 
-    TCq = jacobian(T*u+c, q);
+    TCq = jacobian(T*u-c, q);
     disp('Simplifying TCq');
     TCq = simplify(TCq);
         
-    TCv = jacobian(T*u+c, v);
+    TCv = jacobian(T*u-c, v);
     disp('Simplifying TCv');
     TCv = simplify(TCv);
     
     
-    dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u+c)), n, n) + ...
-        TCq;
+    dfdq = -iH*SRD_matrixjacobian_times_vector(H, q, iH*(T*u-c)) ...
+        + iH*TCq;
+%     dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u-c)), n, n) ...
+%         + iH*TCq;
+
     disp('Simplifying dfdq');
     dfdq = simplify(dfdq);
     

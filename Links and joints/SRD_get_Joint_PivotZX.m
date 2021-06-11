@@ -39,7 +39,7 @@ Joint.ActionUpdate     = @(Input) Update(Joint, Input);
 
     function Update(Link, Input)
 
-        q = Input(Link.Joint.UsedGeneralizedCoordinates);
+        q = SRD_get_UsedGeneralizedCoordinates(Link, Input);
         
         Tz = SRD_RotationMatrix3D_z(q(1));
         Tx = SRD_RotationMatrix3D_x(q(2));
