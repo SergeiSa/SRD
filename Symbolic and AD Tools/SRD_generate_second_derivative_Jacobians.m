@@ -1,4 +1,4 @@
-function description = SRD_generate_second_derivative_Jacobians(varargin)
+function [description, TaskJacobian, TaskJacobian_derivative] = SRD_generate_second_derivative_Jacobians(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_generate_second_derivative_Jacobians';
 Parser.addOptional('SymbolicEngine', []);

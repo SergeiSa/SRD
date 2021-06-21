@@ -14,8 +14,6 @@ if isa(M, 'casadi.SX') || isa(var, 'casadi.SX') || isa(vec, 'casadi.SX')
     P = casadi_zeros(P);
 end
 
-
-
 T = jacobian(M(:), var);
 
 for i = 1:s3

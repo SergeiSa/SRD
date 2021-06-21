@@ -10,6 +10,8 @@ classdef SRDSymbolicEncoding < SRD_Chain
         
         u; %the vector of control actions (scalar values of torques that
         %are being produced by the motors)
+        
+        iH; %inverse of H matrix
 
         
         Casadi = [];
