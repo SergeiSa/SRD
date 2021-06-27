@@ -5,7 +5,7 @@ Parser.FunctionName = 'SRD_get_handler__solver_Taylor';
 Parser.addOptional('Handler_State', []);
 Parser.addOptional('Handler_Controller', []);
 Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
-Parser.addOptional('Handler_Simulation', []);
+Parser.addOptional('Handler_Time', []);
 Parser.addOptional('Handler_Constraints_Model', []);
 
 Parser.parse(varargin{:});
@@ -16,7 +16,7 @@ Handler_solver_TaylorConstrained.Update = @() Update(...
     Parser.Results.Handler_State, ...
     Parser.Results.Handler_Controller, ...
     Parser.Results.Handler_dynamics_generalized_coordinates_model, ...
-    Parser.Results.Handler_Simulation, ...
+    Parser.Results.Handler_Time, ...
     Parser.Results.Handler_Constraints_Model);
 
 %implementing serialization for arbitrary cell arrays of handlers seems to
@@ -29,9 +29,9 @@ Handler_solver_TaylorConstrained.PreSerializationPrepFunction = @PreSerializatio
 
 
     function Update(Handler_State, Handler_Controller, ...
-            Handler_dynamics_generalized_coordinates_model, Handler_Simulation, Handler_Constraints_Model)
+            Handler_dynamics_generalized_coordinates_model, Handler_Time, Handler_Constraints_Model)
         
-        dt = Handler_Simulation.TimeLog(Handler_Simulation.CurrentIndex + 1) - Handler_Simulation.TimeLog(Handler_Simulation.CurrentIndex);
+        dt = Handler_Time.TimeLog(Handler_Time.CurrentIndex + 1) - Handler_Time.TimeLog(Handler_Time.CurrentIndex);
         
         q = Handler_State.q;
         v = Handler_State.v;

@@ -5,13 +5,13 @@ classdef SRDHandler_Time < SRDHandler
         CurrentIndex = 1;
     end
     methods
-        function obj = SRDHandler_Time(varargin)
+        function obj = SRDHandler_Time(TimeLog)
             Parser = inputParser;
             Parser.FunctionName = 'SRDHandler_Time';
             Parser.addOptional('TimeLog', []);
             Parser.parse(varargin{:});
             
-            obj.TimeLog = reshape(Parser.Results.TimeLog, [], 1);
+            obj.TimeLog = TimeLog; 
         end
         function Update(obj)
             obj.CurrentIndex = obj.CurrentIndex + 1;

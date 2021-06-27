@@ -8,7 +8,7 @@ Parser.FunctionName = 'SRD_get_handler__InverseDynamicsConstrained_QR';
 Parser.addOptional('Handler_ControlInput', []);
 Parser.addOptional('Handler_Constraints_Model', []);
 Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
-Parser.addOptional('Handler_Simulation', []);
+Parser.addOptional('Handler_Time', []);
 
 Parser.parse(varargin{:});
 
@@ -19,7 +19,7 @@ Handler_InverseDynamics.Update = @() Update(...
     Parser.Results.Handler_ControlInput, ...
     Parser.Results.Handler_dynamics_generalized_coordinates_model, ...
     Parser.Results.Handler_Constraints_Model, ...
-    Parser.Results.Handler_Simulation);
+    Parser.Results.Handler_Time);
 
 %implementing serialization for arbitrary cell arrays of handlers seems to
 %be more pain than it is worth
@@ -33,9 +33,9 @@ Handler_InverseDynamics.PreSerializationPrepFunction = @PreSerializationPrepFunc
     function Update(Handler_InverseDynamics, Handler_ControlInput, ...
             Handler_dynamics_generalized_coordinates_model, ...
             Handler_Constraints_Model, ...
-            Handler_Simulation)
+            Handler_Time)
         
-        t = Handler_Simulation.CurrentTime;
+        t = Handler_Time.CurrentTime;
         
         n = Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
         k = Handler_Constraints_Model.dof_Constraint;
