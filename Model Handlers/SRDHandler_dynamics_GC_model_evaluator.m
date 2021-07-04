@@ -7,6 +7,7 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         
         last_update_q;
         last_update_v;
+        
         Handler_dynamics_generalized_coordinates_model;
         Handler_State;
         
@@ -17,6 +18,32 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         control_map;
     end
     methods
+        
+        function obj = SRDHandler_dynamics_GC_model_evaluator(varargin)
+            Parser = inputParser;
+            Parser.FunctionName = 'SRDHandler_dynamics_GC_model_evaluator';
+            Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
+            Parser.addOptional('Handler_State', []);
+            Parser.addOptional('UsePinv', true);
+            Parser.parse(varargin{:});
+            
+            obj.Handler_dynamics_generalized_coordinates_model = Parser.Results.Handler_dynamics_generalized_coordinates_model;
+            obj.Handler_State                                  = Parser.Results.Handler_State;
+            
+            obj.dof_configuration_space_robot = Parser.Results.Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
+            obj.dof_control                   = Parser.Results.Handler_dynamics_generalized_coordinates_model.dof_control;
+            
+            obj.UsePinv = Parser.Results.UsePinv;
+            
+            %implementing serialization for arbitrary cell arrays of handlers seems to
+            %be more pain than it is worth
+            obj.SerializationPrepNeeded = true;
+            obj.PreSerializationPrepFunction = @PreSerializationPrepFunction;
+            function PreSerializationPrepFunction(~)
+                error('do not attempt to save Handler_dynamics_GC_model_evaluator; create a new one on the fly instead')
+            end
+            
+        end
         
         function Update(obj, ~)
             squized = obj.Handler_State.get_position_velocity_acceleration();
@@ -48,6 +75,14 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         end
         function iH = get_joint_space_inertia_matrix_inverse(obj, ~)
             iH = obj.joint_space_inertia_matrix_inverse;
+        end
+        function dx = get_FirstOrderSystem_qv(obj, ~, ~)
+            iH = obj.joint_space_inertia_matrix_inverse;
+            c = obj.bias_vector;
+            T = obj.control_map;
+            
+            dx = [obj.last_update_v; 
+                  iH * (T*u - c)];
         end
     end
 end

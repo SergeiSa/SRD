@@ -1,6 +1,7 @@
 classdef SRDHandler_dynamics_Linear_model_evaluator < SRDHandler
     properties
         dof_robot_StateSpace;
+        dof_configuration_space_robot;
         dof_control;
         
         UsePinv;
@@ -23,6 +24,38 @@ classdef SRDHandler_dynamics_Linear_model_evaluator < SRDHandler
         ToEvaluate_c;
     end
     methods
+        
+        function obj = SRDHandler_dynamics_Linear_model_evaluator(varargin)
+            Parser = inputParser;
+            Parser.FunctionName = 'SRD_get_handler__dynamics_GC_model_evaluator';
+            Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
+            Parser.addOptional('Handler_dynamics_Linearized_Model', []);
+            Parser.addOptional('Handler_State', []);
+            Parser.addOptional('Handler_Controller', []);
+            Parser.addOptional('ToEvaluate_c', true);
+            Parser.parse(varargin{:});
+            
+            obj.Handler_dynamics_generalized_coordinates_model = Parser.Results.Handler_dynamics_generalized_coordinates_model;
+            obj.Handler_dynamics_Linearized_Model              = Parser.Results.Handler_dynamics_Linearized_Model;
+            obj.Handler_State                                  = Parser.Results.Handler_State;
+            obj.Handler_Controller                             = Parser.Results.Handler_Controller;
+            
+            
+            obj.dof_control                   = obj.Handler_dynamics_generalized_coordinates_model.dof_control;
+            obj.dof_configuration_space_robot = obj.Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
+            obj.dof_robot_StateSpace      = 2 * obj.dof_configuration_space_robot;
+            
+            obj.ToEvaluate_c         = Parser.Results.ToEvaluate_c;
+            
+            
+            %implementing serialization for arbitrary cell arrays of handlers seems to
+            %be more pain than it is worth
+            obj.SerializationPrepNeeded = true;
+            obj.PreSerializationPrepFunction = @PreSerializationPrepFunction;
+            function PreSerializationPrepFunction(~)
+                error('do not attempt to save Handler_dynamics_Linear_model_evaluator; create a new one on the fly instead')
+            end
+        end
         
         function Update(obj, ~)
             squized = obj.Handler_State.get_position_velocity_acceleration();

@@ -1,4 +1,4 @@
-function description = SRD_generate_dynamics_linearization_c(varargin)
+function [description, A, B, iM] = SRD_generate_dynamics_linearization_c(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_generate_dynamics_linearization';
 Parser.addOptional('SymbolicEngine', []);

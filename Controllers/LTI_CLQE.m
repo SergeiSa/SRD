@@ -7,19 +7,17 @@
 % G dx/xdt = 0
 %
 %
-function Output = LTI_CLQE(System)
+function Output = LTI_CLQE(System, SaveCopmutations)
+
+if nargin < 2
+    SaveCopmutations = 0;
+end
 
 A = System.A;
 B = System.B;
 C = System.C;
 G = System.G;
 g = System.g;
-
-ControllerCost = System.ControllerCost;
-ObserverCost   = System.ObserverCost;
-
-x_desired = System.x_desired;
-x_initial = System.x_initial;
 
 tol = System.tol;
 
@@ -46,32 +44,49 @@ V = GG.null((size_x+1):end, :);
 temp = svd_suit( ( pinv(N'*A)*(N'*A) * V*pinv(V) * R), tol);
 R_used = temp.orth;
 
-E = [N, R_used];
-
 size_z    = size(N,  2);
 size_zeta = size(R_used, 2);
-size_xi   = size_z+size_zeta;
+size_chi  = size_z+size_zeta;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Output.sizes = struct('size_x', size_x, 'size_u', size_u, 'size_y', size_y, 'size_l', size_l, ...
+    'size_z', size_z, 'size_zeta', size_zeta, 'size_chi', size_chi);
 
-Kz    = lqr(N'*A*N, N'*B, ControllerCost.Q, ControllerCost.R);
-Kzeta = pinv(N'*B) * N'*A*R_used;
-K = [Kz, Kzeta];
-
+E = [N, R_used];
 N1 = [N, zeros(size_x, size_zeta)];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% observer gains design
 
-L = lqr((N1'*A*E)', E'*C', ObserverCost.Q, ObserverCost.R);
+if isfield(System.ControllerSettings, 'Cost')
+    Kz = lqr(N'*A*N, N'*B, System.ControllerSettings.Cost.Q, System.ControllerSettings.Cost.R);
+else
+    p = System.ControllerSettings.Poles(1:size(N, 2));
+    Kz = place(N'*A*N, N'*B, p);
+end
+
+if isfield(System.ObserverSettings, 'Cost')
+    L = lqr((N1'*A*E)', E'*C', System.ObserverSettings.Cost.Q, System.ObserverSettings.Cost.R);
+else
+    p = System.ObserverSettings.Poles(1:size(E, 2));
+    L = place((N1'*A*E)', E'*C', p);
+end
 L = L';
 
+Kzeta = pinv(N'*B) * N'*A*R_used;
+K = [Kz, Kzeta];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% IC
-InitialConditions.x    = x_initial;
-InitialConditions.z    = N'     *x_initial;
-InitialConditions.zeta = R_used'*x_initial;
+% observer structure
 
-InitialConditions.xi_estimate_random = 0.01*randn(size_xi, 1); 
+Output.Controller.matrix_chi = K;
+Output.Observer.matrix_chi = (N1'*A*E - L*C*E);
+Output.Observer.matrix_u = N1'*B;
+Output.Observer.matrix_y = L;
+Output.Observer.vector = N1'*g;
 
-zeta = InitialConditions.zeta;
+if SaveCopmutations == 2
+    return;
+end
+
+x_desired = System.x_desired;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% desired
@@ -95,7 +110,6 @@ desired.z_corrected = desired.derivation.z_particular + ...
 %     desired.derivation.Projector * N'*x_desired;
 
 z_des = desired.z_corrected;
-x_des = N*z_des + R_used*zeta;
 
 if norm( (eye(size_z) - (N'*B)*pinv(N'*B)) *(N'*A*N*z_des + N'*g) ) < tol
     u_des = -pinv(N'*B) *(N'*A*N*z_des + N'*g);
@@ -103,53 +117,74 @@ else
     warning('cannot create a node');
 end
 
+desired.u_corrected = u_des;
+
+if SaveCopmutations == 1
+    Output.desired = desired;
+    return;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% IC
+
+x_initial = System.x_initial;
+
+InitialConditions.x    = x_initial;
+InitialConditions.z    = N'     *x_initial;
+InitialConditions.zeta = R_used'*x_initial;
+
+InitialConditions.chi_estimate_random = 0.01*randn(size_chi, 1); 
+
+Output.InitialConditions = InitialConditions;
+
+zeta = InitialConditions.zeta;
+x_des = N*z_des + R_used*zeta;
+
 desired.zeta_corrected = zeta;
 desired.x_corrected    = x_des;
-desired.u_corrected    = u_des;
+Output.desired = desired;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Projected LTI in z-xi coordinates
+%%% Projected LTI in z-chi coordinates
 
-closed_loop.z_xi.Matrix = [N'*A*N,   -N'*B*K;
-                           L*C*N,     (N1'*A*E - N1'*B*K - L*C*E)];
+closed_loop.z_chi.Matrix = [N'*A*N,   -N'*B*K;
+                            L*C*N,     (N1'*A*E - N1'*B*K - L*C*E)];
       
-closed_loop.z_xi.Vector = [N'*A*R_used*zeta + N' *B*Kz*z_des + N' *B*u_des + N' *g;
-                           L*C*R_used*zeta  + N1'*B*Kz*z_des + N1'*B*u_des + N1'*g];
+closed_loop.z_chi.Vector = [N'*A*R_used*zeta + N' *B*Kz*z_des + N' *B*u_des + N' *g;
+                            L*C*R_used*zeta  + N1'*B*Kz*z_des + N1'*B*u_des + N1'*g];
                  
 
-closed_loop.z_xi.ode_fnc = get_ode_fnc(closed_loop.z_xi.Matrix, closed_loop.z_xi.Vector);                       
-closed_loop.z_xi.Y0 = [InitialConditions.z; InitialConditions.xi_estimate_random]; 
+closed_loop.z_chi.ode_fnc = get_ode_fnc(closed_loop.z_chi.Matrix, closed_loop.z_chi.Vector);                       
+closed_loop.z_chi.Y0 = [InitialConditions.z; InitialConditions.chi_estimate_random]; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% LTI in x-xi coordinates
+%%% LTI in x-chi coordinates
 
-closed_loop.x_xi.M = [eye(size_x),            zeros(size_x, size_xi),   -R;
-                      zeros(size_xi, size_x), eye(size_xi,  size_xi),    zeros(size_xi, size_l);
-                      G.self,                 zeros(size_l, size_xi),    zeros(size_l, size_l)];
-iM = pinv(closed_loop.x_xi.M);
-iM11 = iM(1:(size_x+size_xi), 1:(size_x+size_xi));
+closed_loop.x_chi.M = [eye(size_x),            zeros(size_x, size_chi),   -R;
+                      zeros(size_chi, size_x), eye(size_chi,  size_chi),   zeros(size_chi, size_l);
+                      G.self,                  zeros(size_l, size_chi),    zeros(size_l, size_l)];
+iM = pinv(closed_loop.x_chi.M);
+iM11 = iM(1:(size_x+size_chi), 1:(size_x+size_chi));
 
-closed_loop.x_xi.Matrix = iM11*[A,     -B*K;
+closed_loop.x_chi.Matrix = iM11*[A,     -B*K;
                                 L*C,    (N1'*A*E - N1'*B*K - L*C*E)];
       
 
-closed_loop.x_xi.Vector = iM11*[    B*Kz*z_des + B*u_des     + g;
+closed_loop.x_chi.Vector = iM11*[    B*Kz*z_des + B*u_des     + g;
                                 N1'*B*Kz*z_des + N1'*B*u_des + N1'*g];
 
 
-closed_loop.x_xi.ode_fnc = get_ode_fnc(closed_loop.x_xi.Matrix, closed_loop.x_xi.Vector);                       
-closed_loop.x_xi.Y0 = [InitialConditions.x; InitialConditions.xi_estimate_random]; 
+closed_loop.x_chi.ode_fnc = get_ode_fnc(closed_loop.x_chi.Matrix, closed_loop.x_chi.Vector);                       
+closed_loop.x_chi.Y0 = [InitialConditions.x; InitialConditions.chi_estimate_random]; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Output.sizes = struct('size_x', size_x, 'size_u', size_u, 'size_y', size_y, 'size_l', size_l, ...
-    'size_z', size_z, 'size_zeta', size_zeta, 'size_xi', size_xi);
-Output.InitialConditions = InitialConditions;
-Output.desired = desired;
 Output.closed_loop = closed_loop;
 Output.Matrices = struct('G', G, 'N', N, 'R', R, 'R_used', R_used, 'E', E, ...
     'Kz', Kz, 'Kzeta', Kzeta, 'K', K, 'L', L, ...
     'N1', N1);
+
+Output.Controller.vector = u_des;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
