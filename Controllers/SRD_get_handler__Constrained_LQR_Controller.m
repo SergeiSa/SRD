@@ -61,7 +61,8 @@ Handler_LQR.PreSerializationPrepFunction = @PreSerializationPrepFunction;
         F  = Handler_Constraints_Model.get_Jacobian(q);
         dF = Handler_Constraints_Model.get_Jacobian_derivative(q, v);
         
-        G = [F, dF];
+        G = [zeros(size(F)), F; 
+             F,              dF];
         
         N = null(G);
         

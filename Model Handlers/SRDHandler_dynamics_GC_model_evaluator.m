@@ -76,7 +76,7 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         function iH = get_joint_space_inertia_matrix_inverse(obj, ~)
             iH = obj.joint_space_inertia_matrix_inverse;
         end
-        function dx = get_FirstOrderSystem_qv(obj, ~, ~)
+        function dx = get_FirstOrderSystem_qv(obj, ~, u)
             iH = obj.joint_space_inertia_matrix_inverse;
             c = obj.bias_vector;
             T = obj.control_map;

@@ -77,26 +77,44 @@ k = size(F, 1);
 
 if SymbolicEngine.Casadi
     
-    error('To be implemented')
+    %error('To be implemented')
     
-    iH = add_iH_variable(n);
+    map = [eye(n), zeros(n, k)];
     
-    Jq = jacobian(T*u-c, q);
-    Jv = jacobian(T*u-c, v);
+    iM = add_iM_variable(n+k);
+    
+    M = [H, -F';
+         F, zeros(k,k)];
+
+    RHS = [T*u-c; -dF*v];
+    
+    Jq = jacobian(RHS, q);
+    disp('Simplifying TCq');
+    Jq = simplify(Jq);
+        
+    Jv = jacobian(RHS, v);
+    disp('Simplifying TCv');
+    Jv = simplify(Jv);
     
     
-    dfdq = -iH*SRD_matrixjacobian_times_vector(H, q, iH*(T*u-c)) ...
-        + iH*Jq;
+    dfdq = -map*iM*SRD_matrixjacobian_times_vector(M, q, iM*RHS) ...
+        + map*iM*Jq;
+
+    disp('Simplifying dfdq');
+    dfdq = simplify(dfdq);
     
-    dfdv = iH * Jv;
+    dfdv = map*iM * Jv;
+    disp('Simplifying dfdv');
+    dfdv = simplify(dfdv);
     
     A = [zeros(n, n), eye(n);
          dfdq,        dfdv];
+     
+    B = [zeros(n, m); 
+         map*iM*[T; 
+                 zeros(k, m)]];
     
-    B = [zeros(n, m);
-         iH*T];
-    
-    generate_functions_Casadi(A, B, iH, Parser);
+    generate_functions_Casadi(A, B, iM, Parser);
     description.Casadi_cfile_name = Parser.Results.Casadi_cfile_name;
 else
     tic
@@ -120,8 +138,6 @@ else
     
     dfdq = -map*iM*SRD_matrixjacobian_times_vector(M, q, iM*RHS) ...
         + map*iM*Jq;
-%     dfdq = -iH*reshape(jacobian(H(:), q)*(iH*(T*u-c)), n, n) ...
-%         + iH*TCq;
 
     disp('Simplifying dfdq');
     dfdq = simplify(dfdq);
@@ -136,9 +152,6 @@ else
     B = [zeros(n, m); 
          map*iM*[T; 
                  zeros(k, m)]];
-     
-%     A = [zeros(n, n), eye(n);
-%          iH*TCq,      iH * TCv];
      
 
             
@@ -165,13 +178,13 @@ disp('* Linearization finished');
 % function generation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    function iH = add_iH_variable(dof)
+    function iH = add_iM_variable(dof)
         import casadi.*
-        iH = SX.sym('iH', [dof, dof]);        
+        iH = SX.sym('iM', [dof, dof]);        
     end
 
 %     function generate_functions_Casadi(A, B, linear_c, iH, Parser)
-    function generate_functions_Casadi(A, B, iH, Parser)
+    function generate_functions_Casadi(A, B, iM, Parser)
         import casadi.*
         
         %generate functions
@@ -180,15 +193,15 @@ disp('* Linearization finished');
             {Parser.Results.SymbolicEngine.q, ...
              Parser.Results.SymbolicEngine.v, ...
              Parser.Results.SymbolicEngine.u, ...
-             iH}, ...
-            {A}, {'q', 'v', 'u', 'iH'}, {'A'});
+             iM}, ...
+            {A}, {'q', 'v', 'u', 'iM'}, {'A'});
         
         disp(['Starting writing function for the ', Parser.Results.FunctionName_B]);
         g_linearization_B = Function(Parser.Results.FunctionName_B, ...
             {Parser.Results.SymbolicEngine.q, ...
              Parser.Results.SymbolicEngine.v, ...
-             iH}, ...
-            {B}, {'q', 'v', 'iH'}, {'B'});
+             iM}, ...
+            {B}, {'q', 'v', 'iM'}, {'B'});
         
         
         if ~isempty(Parser.Results.Path)

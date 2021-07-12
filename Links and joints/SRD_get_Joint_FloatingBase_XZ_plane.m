@@ -45,8 +45,10 @@ Joint.ChildLink.Update = @(Input) Update(Joint.ChildLink, Input);
 Joint.ActionUpdate     = @(Input) ActionUpdate(Joint, Input);
 
     function Update(Link, Input)
+        input_vec = Input(abs(Link.Joint.UsedGeneralizedCoordinates));
+        
         q = diag(sign(Link.Joint.UsedGeneralizedCoordinates)) * ...
-            reshape(Input(abs(Link.Joint.UsedGeneralizedCoordinates)), [], 1);
+            input_vec(:);
         
         
         Link.RelativeOrientation = SRD_RotationMatrix3D_y(q(3));

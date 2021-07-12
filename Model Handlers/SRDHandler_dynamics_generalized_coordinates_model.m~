@@ -10,7 +10,7 @@ classdef SRDHandler_dynamics_generalized_coordinates_model < SRDHandler
         dof_configuration_space_robot; %number of degrees of freedom
         dof_control; %number of control inputs
         
-        UsePinv; %if true - use pinv for matrix inversion, else use \
+        UsePinv; %if true - use pinv for matrix inversion, or to use \
     end
     methods
         

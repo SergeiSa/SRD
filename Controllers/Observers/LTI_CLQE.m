@@ -7,7 +7,7 @@
 % G dx/xdt = 0
 %
 %
-function Output = LTI_CLQE(System, SaveCopmutations)
+function Output = LTI_CLQE_test(System, SaveCopmutations)
 
 if nargin < 2
     SaveCopmutations = 0;
@@ -39,10 +39,13 @@ D2 = [zeros(dof), eye(dof)];
 GG = [G.self, zeros(size_l, size_x); D1, D2];
 GG = svd_suit(GG, tol);
 
-V = GG.null((size_x+1):end, :);
+% temp = svd_suit([N, GG.row_space((size_x+1):end, :)], tol);
+% R_DS = temp.left_null;
 
-temp = svd_suit( ( pinv(N'*A)*(N'*A) * V*pinv(V) * R), tol);
-R_used = temp.orth;
+NA = svd_suit(N'*A, tol);
+temp = svd_suit([NA.null, N, GG.row_space((size_x+1):end, :)], tol);
+% R_ES = temp.left_null;
+R_used = temp.left_null;
 
 size_z    = size(N,  2);
 size_zeta = size(R_used, 2);
@@ -53,18 +56,41 @@ Output.sizes = struct('size_x', size_x, 'size_u', size_u, 'size_y', size_y, 'siz
 
 E = [N, R_used];
 N1 = [N, zeros(size_x, size_zeta)];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % observer gains design
 
 if isfield(System.ControllerSettings, 'Cost')
-    Kz = lqr(N'*A*N, N'*B, System.ControllerSettings.Cost.Q, System.ControllerSettings.Cost.R);
+    if size(System.ControllerSettings.Cost.Q, 2) == 1
+        costQ = diag(System.ControllerSettings.Cost.Q(1:size_z));
+    else
+        costQ = System.ControllerSettings.Cost.Q;
+    end
+    if size(System.ControllerSettings.Cost.R, 2) == 1
+        costR = diag(System.ControllerSettings.Cost.R(1:size_u));
+    else
+        costR = System.ControllerSettings.Cost.R;
+    end
+    
+    Kz = lqr(N'*A*N, N'*B, costQ, costR);
 else
     p = System.ControllerSettings.Poles(1:size(N, 2));
     Kz = place(N'*A*N, N'*B, p);
 end
 
 if isfield(System.ObserverSettings, 'Cost')
-    L = lqr((N1'*A*E)', E'*C', System.ObserverSettings.Cost.Q, System.ObserverSettings.Cost.R);
+    if size(System.ObserverSettings.Cost.Q, 2) == 1
+        costQ = diag(System.ObserverSettings.Cost.Q(1:size_chi));
+    else
+        costQ = System.ObserverSettings.Cost.Q;
+    end
+    if size(System.ObserverSettings.Cost.R, 2) == 1
+        costR = diag(System.ObserverSettings.Cost.R(1:size_y));
+    else
+        costR = System.ObserverSettings.Cost.R;
+    end
+    
+    L = lqr((N1'*A*E)', E'*C', costQ, costR);
 else
     p = System.ObserverSettings.Poles(1:size(E, 2));
     L = place((N1'*A*E)', E'*C', p);
@@ -82,42 +108,69 @@ Output.Observer.matrix_u = N1'*B;
 Output.Observer.matrix_y = L;
 Output.Observer.vector = N1'*g;
 
+Output.Observer.map = E;
+
+Output.Matrices = struct('G', G, 'N', N, 'R', R, 'R_used', R_used, 'E', E, ...
+    'Kz', Kz, 'Kzeta', Kzeta, 'K', K, 'L', L, ...
+    'N1', N1);
+Output.System = System;
+
 if SaveCopmutations == 2
     return;
 end
 
-x_desired = System.x_desired;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% desired
 
-desired.x      = x_desired;
-desired.z      = N'     *x_desired;
-desired.zeta   = R_used'*x_desired; 
+desired.x      = System.x_desired;
+desired.dx     = System.dx_desired;
+desired.z      = N'     *desired.x;
+desired.dz     = N'     *desired.dx;
+%desired.zeta   = R_used'*x_desired; 
 
-desired.derivation.M = svd_suit([N'*A*N, N'*B], tol);
-desired.derivation.N = desired.derivation.M.null;
-desired.derivation.zu_particular = -desired.derivation.M.pinv * N'*g;
+desired.derivation.NB = svd_suit(N'*B, tol);
+desired.derivation.NB_projector = desired.derivation.NB.left_null * desired.derivation.NB.left_null';
+desired.derivation.M = svd_suit([-desired.derivation.NB_projector*N'*A*N, desired.derivation.NB_projector], tol);
+desired.derivation.zdz_corrected = ...
+    desired.derivation.M.pinv *desired.derivation.NB_projector*N'*g + ...%particular solution
+    desired.derivation.M.null*desired.derivation.M.null' * [desired.z; desired.dz];
 
-desired.derivation.map.z = [eye(size_z),           zeros(size_z, size_u)];
-desired.derivation.map.u = [zeros(size_u, size_z), eye(size_u)];
-desired.derivation.z_particular = -desired.derivation.map.z * desired.derivation.M.pinv * N'*g;
-desired.derivation.Projector = (desired.derivation.map.z* desired.derivation.N) * pinv(desired.derivation.map.z * desired.derivation.N);
+desired.z_corrected  = desired.derivation.zdz_corrected(1:size_z);
+desired.dz_corrected = desired.derivation.zdz_corrected((1+size_z):end);
 
-desired.z_corrected = desired.derivation.z_particular + ...
-    desired.derivation.Projector * (desired.z - desired.derivation.z_particular);
-% desired.z_corrected = (eye(size(desired.derivation.Projector)) - desired.derivation.Projector) * desired.derivation.z_particular + ...
-%     desired.derivation.Projector * N'*x_desired;
+if norm( desired.derivation.NB.left_null*desired.derivation.NB.left_null'*...
+        (desired.dz_corrected - N'*A*N*desired.z_corrected - N'*g) ) < tol
 
-z_des = desired.z_corrected;
+desired.u_corrected = desired.derivation.NB.pinv * (desired.dz_corrected - N'*A*N*desired.z_corrected - N'*g);
+Output.Controller.vector = desired.u_corrected;
 
-if norm( (eye(size_z) - (N'*B)*pinv(N'*B)) *(N'*A*N*z_des + N'*g) ) < tol
-    u_des = -pinv(N'*B) *(N'*A*N*z_des + N'*g);
 else
     warning('cannot create a node');
 end
 
-desired.u_corrected = u_des;
+    
+
+% desired.derivation.zu_particular = -desired.derivation.M.pinv * N'*g;
+% 
+% desired.derivation.map.z = [eye(size_z),           zeros(size_z, size_u)];
+% desired.derivation.map.u = [zeros(size_u, size_z), eye(size_u)];
+% desired.derivation.z_particular = -desired.derivation.map.z * desired.derivation.M.pinv * N'*g;
+% desired.derivation.Projector = (desired.derivation.map.z* desired.derivation.N) * pinv(desired.derivation.map.z * desired.derivation.N);
+% 
+% desired.z_corrected = desired.derivation.z_particular + ...
+%     desired.derivation.Projector * (desired.z - desired.derivation.z_particular);
+% % desired.z_corrected = (eye(size(desired.derivation.Projector)) - desired.derivation.Projector) * desired.derivation.z_particular + ...
+% %     desired.derivation.Projector * N'*x_desired;
+% 
+% z_des = desired.z_corrected;
+% 
+% if norm( (eye(size_z) - (N'*B)*pinv(N'*B)) *(N'*A*N*z_des + N'*g) ) < tol
+%     u_des = -pinv(N'*B) *(N'*A*N*z_des + N'*g);
+% else
+%     warning('cannot create a node');
+% end
+
 
 if SaveCopmutations == 1
     Output.desired = desired;
@@ -138,10 +191,14 @@ InitialConditions.chi_estimate_random = 0.01*randn(size_chi, 1);
 Output.InitialConditions = InitialConditions;
 
 zeta = InitialConditions.zeta;
+
+u_des = desired.u_corrected;
+z_des = desired.z_corrected ;
 x_des = N*z_des + R_used*zeta;
 
 desired.zeta_corrected = zeta;
 desired.x_corrected    = x_des;
+
 Output.desired = desired;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -177,14 +234,9 @@ closed_loop.x_chi.Vector = iM11*[    B*Kz*z_des + B*u_des     + g;
 closed_loop.x_chi.ode_fnc = get_ode_fnc(closed_loop.x_chi.Matrix, closed_loop.x_chi.Vector);                       
 closed_loop.x_chi.Y0 = [InitialConditions.x; InitialConditions.chi_estimate_random]; 
 
+Output.closed_loop = closed_loop;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Output.closed_loop = closed_loop;
-Output.Matrices = struct('G', G, 'N', N, 'R', R, 'R_used', R_used, 'E', E, ...
-    'Kz', Kz, 'Kzeta', Kzeta, 'K', K, 'L', L, ...
-    'N1', N1);
-
-Output.Controller.vector = u_des;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

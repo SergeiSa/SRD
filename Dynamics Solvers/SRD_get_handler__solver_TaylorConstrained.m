@@ -35,6 +35,7 @@ Handler_solver_TaylorConstrained.PreSerializationPrepFunction = @PreSerializatio
         
         q = Handler_State.q;
         v = Handler_State.v;
+        u = Handler_Controller.u;
         
         n = Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
         k = Handler_Constraints_Model.dof_Constraint;
@@ -46,7 +47,6 @@ Handler_solver_TaylorConstrained.PreSerializationPrepFunction = @PreSerializatio
         F  = Handler_Constraints_Model.get_Jacobian(q);
         dF = Handler_Constraints_Model.get_Jacobian_derivative(q, v);
         
-        u = Handler_Controller.u;
         
         M = [H, -F';
              F,  zeros(k, k)];

@@ -3,11 +3,15 @@ classdef SRDHandler_Controller < SRDHandler
         u;
         
         Update;
-        
-        SerializationPrepNeeded = true;
     end
     methods
-        function PreSerializationPrepFunction(~)
+        
+        function obj = SRDHandler_Controller()
+            obj.SerializationPrepNeeded = true;
+            obj.PreSerializationPrepFunction = @obj.PreSerializationPrepFunction_Controller;
+        end
+        
+        function PreSerializationPrepFunction_Controller(~)
             error('do not attempt to save Handler_ComputedTorqueController; create a new one on the fly instead')
         end
         
