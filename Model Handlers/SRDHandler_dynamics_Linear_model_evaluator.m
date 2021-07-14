@@ -1,6 +1,6 @@
 classdef SRDHandler_dynamics_Linear_model_evaluator < SRDHandler
     properties
-        dof_robot_StateSpace;
+        dof_state_space_robot;
         dof_configuration_space_robot;
         dof_control;
         
