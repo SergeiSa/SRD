@@ -14,6 +14,7 @@ end
 
 Handler_dynamics_Linearized_Model = SRDHandler_dynamics_Linearized_Model();
 Handler_dynamics_Linearized_Model.State.description = description;
+Handler_dynamics_Linearized_Model.LinearizationType = description.LinearizationType;
 
 Handler_dynamics_Linearized_Model.dof_configuration_space_robot = description.dof_configuration_space_robot;
 Handler_dynamics_Linearized_Model.dof_state_space_robot         = description.dof_state_space_robot;

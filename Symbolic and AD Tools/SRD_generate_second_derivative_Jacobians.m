@@ -1,4 +1,4 @@
-function [description, TaskJacobian, TaskJacobian_derivative] = SRD_generate_second_derivative_Jacobians(varargin)
+function [description, TaskJacobian, TaskJacobian_derivative, other] = SRD_generate_second_derivative_Jacobians(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_generate_second_derivative_Jacobians';
 Parser.addOptional('SymbolicEngine', []);
@@ -12,6 +12,8 @@ Parser.addOptional('Casadi_cfile_name', 'g_abstract');
 Parser.addOptional('FunctionName_Task', 'g_abstract_Task');
 Parser.addOptional('FunctionName_TaskJacobian', 'g_abstract_TaskJacobian');
 Parser.addOptional('FunctionName_TaskJacobian_derivative', 'g_abstract_TaskJacobian_derivative');
+
+Parser.addOptional('CasadiSpecific_ToGenerateCfiles', true);
 
 Parser.addOptional('Path', []);
 
@@ -41,7 +43,7 @@ if SymbolicEngine.Casadi
     TaskJacobian_derivative = jacobian(TaskJacobian(:), SymbolicEngine.q) * SymbolicEngine.v;
     TaskJacobian_derivative = reshape(TaskJacobian_derivative, size(TaskJacobian));
     
-    generate_functions_function_Casadi(Parser.Results.Task, TaskJacobian, TaskJacobian_derivative, Parser);
+    other = generate_functions_function_Casadi(Parser.Results.Task, TaskJacobian, TaskJacobian_derivative, Parser);
     
     description.Casadi_cfile_name = Parser.Results.Casadi_cfile_name;
 else
@@ -97,7 +99,7 @@ description.dof_task                              = dof_task;
 % function generation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    function generate_functions_function_Casadi(Task, TaskJacobian, TaskJacobian_derivative, Parser)
+    function other = generate_functions_function_Casadi(Task, TaskJacobian, TaskJacobian_derivative, Parser)
         import casadi.*
         
         %generate functions
@@ -113,56 +115,67 @@ description.dof_task                              = dof_task;
         g_TaskJacobian_derivative = Function(Parser.Results.FunctionName_TaskJacobian_derivative, ...
             {Parser.Results.SymbolicEngine.q, Parser.Results.SymbolicEngine.v}, {TaskJacobian_derivative}, {'q', 'v'}, {'TaskJacobian_derivative'});
         
-        
-        if ~isempty(Parser.Results.Path)
-            current_dir = pwd;
-            cd(Parser.Results.Path);
+        if Parser.Results.CasadiSpecific_ToGenerateCfiles
+            if ~isempty(Parser.Results.Path)
+                current_dir = pwd;
+                cd(Parser.Results.Path);
+            end
+            
+            c_function_name = [Parser.Results.Casadi_cfile_name, '.c'];
+            so_function_name = [Parser.Results.Casadi_cfile_name, '.so'];
+            
+            
+            opts = struct('main', true,...
+                'mex', true);
+            
+            CG = CodeGenerator(c_function_name, opts);
+            CG.add(g_Task);
+            CG.add(g_TaskJacobian);
+            CG.add(g_TaskJacobian_derivative);
+            CG.generate();
+            
+            command = 'gcc -fPIC -shared ';
+            command = [command, c_function_name];
+            command = [command, ' -o '];
+            command = [command, so_function_name];
+            
+            disp(' ');
+            disp('Command to be executed:');
+            disp(command);
+            
+            system(command);
+            %!gcc -fPIC -shared g_InverseKinematics.c -o g_InverseKinematics.so
+            
+            if ~isempty(Parser.Results.Path)
+                cd(current_dir);
+            end
+            
+            other.CG = CG;
+            
         end
         
-        c_function_name = [Parser.Results.Casadi_cfile_name, '.c'];
-        so_function_name = [Parser.Results.Casadi_cfile_name, '.so'];
-        
-        CG = CodeGenerator(c_function_name);
-        CG.add(g_Task);
-        CG.add(g_TaskJacobian);
-        CG.add(g_TaskJacobian_derivative);
-        CG.generate();
-        
-        command = 'gcc -fPIC -shared ';
-        command = [command, c_function_name];
-        command = [command, ' -o '];
-        command = [command, so_function_name];
-        
-        disp(' ');
-        disp('Command to be executed:');
-        disp(command);
-        
-        system(command);
-        %!gcc -fPIC -shared g_InverseKinematics.c -o g_InverseKinematics.so
-        
-        if ~isempty(Parser.Results.Path)
-            cd(current_dir);
-        end
-        
+        other.g_Task = g_Task;
+        other.g_TaskJacobian = g_TaskJacobian;
+        other.g_TaskJacobian_derivative = g_TaskJacobian_derivative;
     end
 
 
-    function generate_functions_function_symbolic(Task, TaskJacobian, TaskJacobian_derivative, Parser)
+    function other = generate_functions_function_symbolic(Task, TaskJacobian, TaskJacobian_derivative, Parser)
         
         FileName_Task                    = [Parser.Results.Path, Parser.Results.FunctionName_Task];
         FileName_TaskJacobian            = [Parser.Results.Path, Parser.Results.FunctionName_TaskJacobian];
         FileName_TaskJacobian_derivative = [Parser.Results.Path, Parser.Results.FunctionName_TaskJacobian_derivative];
         
         disp(['Starting writing function ', FileName_Task]);
-        matlabFunction(Task, 'File', FileName_Task, ...
+        other.g_Task = matlabFunction(Task, 'File', FileName_Task, ...
             'Vars', {Parser.Results.SymbolicEngine.q}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
         disp(['Starting writing function ', FileName_TaskJacobian]);
-        matlabFunction(TaskJacobian, 'File', FileName_TaskJacobian, ...
+        other.g_TaskJacobian = matlabFunction(TaskJacobian, 'File', FileName_TaskJacobian, ...
             'Vars', {Parser.Results.SymbolicEngine.q}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
         disp(['Starting writing function ', FileName_TaskJacobian_derivative]);
-        matlabFunction(TaskJacobian_derivative, 'File', FileName_TaskJacobian_derivative, ...
+        other.g_TaskJacobian_derivative = matlabFunction(TaskJacobian_derivative, 'File', FileName_TaskJacobian_derivative, ...
             'Vars', {Parser.Results.SymbolicEngine.q, Parser.Results.SymbolicEngine.v}, 'Optimize', Parser.Results.Symbolic_ToOptimizeFunctions);
         
         disp('* Finished generating functions'); disp(' ')

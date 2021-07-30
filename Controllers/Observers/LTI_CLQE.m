@@ -7,7 +7,7 @@
 % G dx/xdt = 0
 %
 %
-function Output = LTI_CLQE_test(System, SaveCopmutations)
+function Output = LTI_CLQE(System, SaveCopmutations)
 
 if nargin < 2
     SaveCopmutations = 0;
@@ -20,6 +20,7 @@ G = System.G;
 g = System.g;
 
 tol = System.tol;
+R_type = System.R_type;
 
 size_x = size(A, 2);
 size_u = size(B, 2);
@@ -31,21 +32,38 @@ N = G.null; R = G.row_space; %E = [N, R];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derivative-State Constraints and Effective States 
-%D1*dx/dt + D2*x = 0
 dof = size_x/2;
-D1 = [eye(dof), zeros(dof)];
-D2 = [zeros(dof), eye(dof)];
+constraint_dof = size_l/2;
 
-GG = [G.self, zeros(size_l, size_x); D1, D2];
-GG = svd_suit(GG, tol);
+%D1*dx/dt + D2*x = 0
+% % D1 = [eye(dof), zeros(dof)];
+% % D2 = [zeros(dof), eye(dof)];
+% % D2 = svd_suit(D2, tol);
+% % 
+% % S_SC = svd_suit( [-D2.pinv*D1*N, D2.null ], tol );
+% % 
+% % R_SC_temp = svd_suit([N, S_SC.left_null], tol);
+% % R_SC = R_SC_temp.left_null;
 
-% temp = svd_suit([N, GG.row_space((size_x+1):end, :)], tol);
-% R_DS = temp.left_null;
+% Gx*x = 0
+if norm(G.self(1:constraint_dof, (dof+1):end)) > tol
+    error('G is expressed in a wrong convension: x = [q;v], velocity constraints go first, G = [F, 0; dF/dt, F];');
+end
+Gx = svd_suit( [zeros(constraint_dof, dof), G.self(1:constraint_dof, 1:dof)], tol);
+R_SC_suit = svd_intersection(N, Gx.row_space, tol, true, true);
+R_SC = R_SC_suit.self;
 
-NA = svd_suit(N'*A, tol);
-temp = svd_suit([NA.null, N, GG.row_space((size_x+1):end, :)], tol);
-% R_ES = temp.left_null;
-R_used = temp.left_null;
+R_ES_suit = svd_suit( R_SC*R_SC'*A'*N, tol );
+R_ES = R_ES_suit.orth;
+
+switch R_type
+    case 'FS'
+        R_used = R;
+    case 'SC'
+        R_used = R_SC;
+    case 'ES'
+        R_used = R_ES;
+end
 
 size_z    = size(N,  2);
 size_zeta = size(R_used, 2);
@@ -72,7 +90,13 @@ if isfield(System.ControllerSettings, 'Cost')
         costR = System.ControllerSettings.Cost.R;
     end
     
-    Kz = lqr(N'*A*N, N'*B, costQ, costR);
+    try
+        Kz = lqr(N'*A*N, N'*B, costQ, costR);
+    catch ME
+        warning('lqr failed to find Kz');
+        Kz = [];
+%         throw(ME);
+    end
 else
     p = System.ControllerSettings.Poles(1:size(N, 2));
     Kz = place(N'*A*N, N'*B, p);
@@ -90,7 +114,12 @@ if isfield(System.ObserverSettings, 'Cost')
         costR = System.ObserverSettings.Cost.R;
     end
     
-    L = lqr((N1'*A*E)', E'*C', costQ, costR);
+    try
+        L = lqr((N1'*A*E)', E'*C', costQ, costR);
+    catch ME
+        throw(ME);
+    end
+    
 else
     p = System.ObserverSettings.Poles(1:size(E, 2));
     L = place((N1'*A*E)', E'*C', p);
@@ -112,7 +141,8 @@ Output.Observer.map = E;
 
 Output.Matrices = struct('G', G, 'N', N, 'R', R, 'R_used', R_used, 'E', E, ...
     'Kz', Kz, 'Kzeta', Kzeta, 'K', K, 'L', L, ...
-    'N1', N1);
+    'N1', N1, ...
+    'R_SC', R_SC, 'R_ES', R_ES);
 Output.System = System;
 
 if SaveCopmutations == 2

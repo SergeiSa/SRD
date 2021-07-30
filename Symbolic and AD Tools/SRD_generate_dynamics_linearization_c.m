@@ -1,6 +1,6 @@
 function [description, A, B, iM] = SRD_generate_dynamics_linearization_c(varargin)
 Parser = inputParser;
-Parser.FunctionName = 'SRD_generate_dynamics_linearization';
+Parser.FunctionName = 'SRD_generate_dynamics_linearization_c';
 Parser.addOptional('SymbolicEngine', []);
 
 % Parser.addOptional('Symbolic_UseParallelizedSimplification', false);
@@ -20,9 +20,9 @@ Parser.addOptional('FunctionName_B', 'g_linearization_B');
 Parser.addOptional('FunctionName_c', 'g_linearization_c');
 
 Parser.addOptional('Path', []);
-
-
 Parser.parse(varargin{:});
+
+description.LinearizationType = 'constained';
 
 if isempty(Parser.Results.SymbolicEngine)
     error('Please provide SymbolicEngine')

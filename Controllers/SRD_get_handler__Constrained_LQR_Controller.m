@@ -1,3 +1,13 @@
+%Continuous-time Constrained LQR controller (LTI) - LQR for systems with explicit 
+%mechanical constraints.
+%
+%For details see: 
+%
+% Mason, S., Rotella, N., Schaal, S. and Righetti, L.,
+% 2016, November. Balancing and walking using full dynamics LQR control with
+% contact constraints. In 2016 IEEE-RAS 16th International Conference on Humanoid Robots (Humanoids) (pp. 63-68). IEEE.
+% https://arxiv.org/pdf/1701.08179.pdf
+%
 function Handler_LQR = SRD_get_handler__Constrained_LQR_Controller(varargin)
 
 Parser = inputParser;
@@ -11,10 +21,12 @@ Parser.addOptional('Handler_Time', []);
 Parser.addOptional('Handler_InverseDynamics', []);
 Parser.addOptional('Q', []);
 Parser.addOptional('R', []);
+Parser.addOptional('ToLog', true);
 
 Parser.parse(varargin{:});
 
 Handler_LQR = SRDHandler_Controller;
+Handler_LQR.ToLog = Parser.Results.ToLog;
 
 Handler_LQR.Update = @() Update(...
     Handler_LQR, ...
@@ -28,15 +40,9 @@ Handler_LQR.Update = @() Update(...
     Parser.Results.Q, ...
     Parser.Results.R);
 
-%implementing serialization for arbitrary cell arrays of handlers seems to
-%be more pain than it is worth
-Handler_LQR.SerializationPrepNeeded = true;
-Handler_LQR.PreSerializationPrepFunction = @PreSerializationPrepFunction;
-    function PreSerializationPrepFunction(~)
-        error('do not attempt to save Handler_ComputedTorqueController; create a new one on the fly instead')
-    end
-
-
+    %this function needs to be called every time one needs teh controller
+    %to update its control law; typically it is called once on every
+    %simulation step.
     function Update(Handler_LQR, ...
             Handler_State, ...
             Handler_State_StateSpace, ...
@@ -80,6 +86,16 @@ Handler_LQR.PreSerializationPrepFunction = @PreSerializationPrepFunction;
         u_FF = Handler_InverseDynamics.u;
         
         Handler_LQR.u = u_FB + u_FF;
+        
+        %logging
+        if Handler_LQR.ToLog
+            Handler_LQR.control_law.K  = K;
+            Handler_LQR.control_law.Kn = Kn;
+            Handler_LQR.control_law.N  = N;
+            Handler_LQR.control_law.e  = e;
+            Handler_LQR.control_law.u_FB  = u_FB;
+            Handler_LQR.control_law.u_FF  = u_FF;
+        end
     end
 
 end

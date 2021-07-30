@@ -49,11 +49,12 @@ Handler_InverseDynamics.Update = @() Update(...
         % %
         
         [Q, R] = qr(F');
-        R_c = R(1:k, :);
+        kk = size(R, 2);
+        R_c = R(1:kk, :);
         
         I = eye(n);
-        I_c = I(1:k, :);
-        I_u = I((k+1):end, :);
+        I_c = I(1:kk, :);
+        I_u = I((kk+1):end, :);
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % %

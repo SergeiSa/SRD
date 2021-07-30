@@ -24,7 +24,13 @@ for i = 1:n
             continue;
         end
         
-        Vertices = SimulationEngine.LinkArray(i).Mesh.vertices;
+        if isfield(SimulationEngine.LinkArray(i).Mesh, 'Vertices')
+            Vertices = SimulationEngine.LinkArray(i).Mesh.Vertices;
+            Faces = SimulationEngine.LinkArray(i).Mesh.Faces;
+        else
+            Vertices = SimulationEngine.LinkArray(i).Mesh.vertices;
+            Faces = SimulationEngine.LinkArray(i).Mesh.faces;
+        end
         
         Polygon = struct();
         Polygon.vertices = SimulationEngine.LinkArray(i).AbsoluteOrientation * Vertices'...
@@ -32,7 +38,7 @@ for i = 1:n
         Polygon.vertices = Polygon.vertices';
         
         if isempty(old_h)
-            Polygon.faces = SimulationEngine.LinkArray(i).Mesh.faces;
+            Polygon.faces = Faces;
             
             if isempty(SimulationEngine.LinkArray(i).Color)
                 LinkFaceColor = FaceColor;

@@ -7,6 +7,8 @@ classdef SRDHandler_dynamics_Linearized_Model < SRDHandler
         dof_configuration_space_robot;
         dof_state_space_robot;
         dof_control;
+        
+        LinearizationType;
     end
     methods
         function handle = get_A_handle(obj)

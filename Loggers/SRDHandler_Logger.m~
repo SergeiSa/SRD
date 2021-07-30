@@ -1,14 +1,7 @@
-%class that Loggers are instances of or inherit from. Used to automatically
-%create scecific logs during the Simulation/Update of the systems elements
+%Logger
 classdef SRDHandler_Logger < SRDHandler
     properties
-        
-        %this function needs to be called every time the logs are to be
-        %written (typically on every iteration of Simulation/Update)
         Update;
-        
-        %the data to be logged is stored here. Structure of this field can
-        %change.
         Log;
     end
     methods

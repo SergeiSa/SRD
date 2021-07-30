@@ -26,14 +26,6 @@ Handler_State_Logger_vanilla.Update = @() Update(...
     Parser.Results.Handler_Time, ...
     Parser.Results.ToLogAcceleration);
 
-%implementing serialization for arbitrary cell arrays of handlers seems to
-%be more pain than it is worth
-Handler_State_Logger_vanilla.SerializationPrepNeeded = true;
-Handler_State_Logger_vanilla.PreSerializationPrepFunction = @PreSerializationPrepFunction;
-    function PreSerializationPrepFunction(~)
-        error('do not attempt to save Handler_State_Logger_vanilla; create a new one on the fly instead')
-    end
-
 
     function Update(Handler_State_Logger_vanilla, Handler_State, Handler_Time, ToLogAcceleration)
         

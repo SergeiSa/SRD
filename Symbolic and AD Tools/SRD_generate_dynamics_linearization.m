@@ -1,4 +1,4 @@
-function [description, A, B] = SRD_generate_dynamics_linearization(varargin)
+function [description, A, B, iH] = SRD_generate_dynamics_linearization(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_generate_dynamics_linearization';
 Parser.addOptional('SymbolicEngine', []);
@@ -18,9 +18,10 @@ Parser.addOptional('FunctionName_B', 'g_linearization_B');
 Parser.addOptional('FunctionName_c', 'g_linearization_c');
 
 Parser.addOptional('Path', []);
-
-
 Parser.parse(varargin{:});
+
+description.LinearizationType = 'normal';
+
 
 if isempty(Parser.Results.SymbolicEngine)
     error('Please provide SymbolicEngine')

@@ -16,6 +16,7 @@ classdef SRD_CLQE < SRDHandler_Controller
             Parser.addOptional('C', []);
             Parser.addOptional('ControllerSettings', []);
             Parser.addOptional('ObserverSettings', []);
+            Parser.addOptional('R_type', 'ES');
             Parser.addOptional('tol', []);
             
             Parser.parse(varargin{:});
@@ -30,6 +31,7 @@ classdef SRD_CLQE < SRDHandler_Controller
                 Parser.Results.C, ...
                 Parser.Results.ControllerSettings, ...
                 Parser.Results.ObserverSettings, ...
+                Parser.Results.R_type, ...
                 Parser.Results.tol);
             
         end
@@ -46,6 +48,7 @@ classdef SRD_CLQE < SRDHandler_Controller
                 C, ...
                 ControllerSettings, ...
                 ObserverSettings, ...
+                R_type, ...
                 tol)
                    
             
@@ -70,22 +73,44 @@ classdef SRD_CLQE < SRDHandler_Controller
                       
             F  = Handler_Constraints_Model.get_Jacobian(desired_q);
             dF = Handler_Constraints_Model.get_Jacobian_derivative(desired_q, desired_v);
-            G = [zeros(k, dof), F; F, dF];
+            G = [F, zeros(k, dof); dF, F];
             k = Handler_Constraints_Model.dof_Constraint;
-            
-            M = [H, -F';
-                 F, zeros(k, k)];
-            iM = pinv(M);
-            Ma = iM(1:n, :);
-            
-            a0 = Ma*[(T*desired_u - c); -dF*desired_v];
-            g = [desired_v; a0]; 
             
             A = Handler_dynamics_Linearized_Model.get_A();
             B = Handler_dynamics_Linearized_Model.get_B();
-            %g = f0 - A * desired_x - B * desired_u;
+            
+            switch Handler_dynamics_Linearized_Model.LinearizationType
+                case 'normal'
+                    R = [F',              zeros(size(F'));
+                         zeros(size(F')), pinv(H)*F'];
+                     
+                    iHf = pinv(H)*(T*desired_u - c); 
+                    
+                    %MM = [eye(2*n), -R;
+                    %      G,         zeros(2*k)];
+                    %vec2 = pinv(MM) * [desired_v; iHf; zeros(2*k, 1)];
+                    %a2 = vec2((n+1):(2*n))
+                    
+                    M_GR = eye(2*n) - R*pinv(G*R)*G;
+                    
+                    va = M_GR * [desired_v; iHf];
+                    a0 = va((n+1):(2*n));
+                    
+                    A = M_GR * A;
+                    B = M_GR * B;
+                    
+                case 'constained'
+                    M = [H, -F';
+                        F, zeros(k, k)];
+                    iM = pinv(M);
+                    Ma = iM(1:n, :);
+                    
+                    a0 = Ma*[(T*desired_u - c); -dF*desired_v];
+            end
+            g = [desired_v; a0];
             
             System = struct('A', A, 'B', B, 'C', C, 'G', G, 'g', g, 'tol', tol, ...
+                'R_type', R_type, ...
                 'ControllerSettings', ControllerSettings, 'ObserverSettings', ObserverSettings, ...
                 'x_desired', desired_x, 'dx_desired', desired_dx);
             SaveCopmutations = 1;
@@ -94,3 +119,7 @@ classdef SRD_CLQE < SRDHandler_Controller
         
     end
 end
+
+
+
+

@@ -10,7 +10,7 @@ Parser.addOptional('Type', 'Default'); %'Default', 'STL', 'Custom'
 Parser.addOptional('DrawRobot_function', []);
 Parser.addOptional('NewFigure', true);
 Parser.addOptional('FigureName', 'Animation');
-Parser.addOptional('FileName_visuals_config', []);
+Parser.addOptional('FileName_visuals_config', 'datafile_visuals_config.mat'); 
 
 Parser.parse(varargin{:});
 
