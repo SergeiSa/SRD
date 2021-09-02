@@ -63,7 +63,7 @@ classdef SRD_CLQE < SRDHandler_Controller
             obj.ControllerSettings                             = Parser.Results.ControllerSettings;
             obj.ObserverSettings                               = Parser.Results.ObserverSettings;
             obj.R_type                                         = Parser.Results.R_type;
-            obj.R_custom                                       = Parser.Results.R_custom;
+            obj.R_custom                                        = Parser.Results.R_type;
             
             obj.SaveCopmutations                               = Parser.Results.SaveCopmutations;
             obj.SystemExtraParameters                          = Parser.Results.SystemExtraParameters;

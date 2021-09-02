@@ -1,7 +1,8 @@
-function SRD__make_default_scene(Type)
+function SRD__make_default_scene(Type, FileName_visuals_config)
 
-SRD = SRDinterface();
-FileName_visuals_config = SRD.FileName_visuals_config;
+if nargin < 2
+    FileName_visuals_config = 'datafile_visuals_config.mat';
+end
 visuals_config = load(FileName_visuals_config);
 visuals_config = visuals_config.visuals_config;
 

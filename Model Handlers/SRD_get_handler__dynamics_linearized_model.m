@@ -54,7 +54,6 @@ end
                
         Handler_dynamics_Linearized_Model.get_A = @(q, v, u, iH) full(evalf(external_A(q, v, u, iH)));
         Handler_dynamics_Linearized_Model.get_B = @(q, v,    iH) full(evalf(external_B(q, v,    iH)));
-        %Handler_dynamics_Linearized_Model.get_c = @(q, v, u, iH) full(evalf(external_c(q, v, u, iH)));
   
     end
     function PreSerializationPrepFunction(Handler_dynamics_Linearized_Model)

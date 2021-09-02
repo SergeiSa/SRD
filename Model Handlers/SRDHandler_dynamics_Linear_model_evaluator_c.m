@@ -19,6 +19,7 @@ classdef SRDHandler_dynamics_Linear_model_evaluator_c < SRDHandler
         Handler_Controller;
         
         LinearizationType;
+        TemporalType;
         
         %dx/dt = A*x + B*u + c
         A;
@@ -44,6 +45,7 @@ classdef SRDHandler_dynamics_Linear_model_evaluator_c < SRDHandler
             
             
             obj.LinearizationType             = obj.Handler_dynamics_Linearized_Model.LinearizationType;
+            obj.TemporalType                  = obj.Handler_dynamics_Linearized_Model.TemporalType;
             obj.dof_control                   = obj.Handler_dynamics_generalized_coordinates_model.dof_control;
             obj.dof_configuration_space_robot = obj.Handler_dynamics_generalized_coordinates_model.dof_configuration_space_robot;
             obj.dof_state_space_robot         = 2 * obj.dof_configuration_space_robot;

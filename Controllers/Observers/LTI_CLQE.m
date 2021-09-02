@@ -63,6 +63,8 @@ switch R_type
         R_used = R_SC;
     case 'ES'
         R_used = R_ES;
+    case 'custom'
+        R_used = System.R_custom;
 end
 
 size_z    = size(N,  2);
@@ -128,6 +130,7 @@ L = L';
 
 Kzeta = pinv(N'*B) * N'*A*R_used;
 K = [Kz, Kzeta];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % observer structure
 
@@ -148,7 +151,6 @@ Output.System = System;
 if SaveCopmutations == 2
     return;
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% desired
