@@ -2,7 +2,7 @@ function Handler_IK_Model = SRD_get_handler__IK_model(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_get_handler__IK_model';
 Parser.addOptional('description', []);
-Parser.addOptional('dof_robot', []);
+Parser.addOptional('dof_configuration_space_robot', []);
 Parser.addOptional('dof_Task', []);
 Parser.parse(varargin{:});
 
@@ -17,7 +17,7 @@ end
 Handler_IK_Model = SRDHandler_IK_Model();
 Handler_IK_Model.State.description = description;
 
-Handler_IK_Model.dof_robot = Parser.Results.dof_robot;
+Handler_IK_Model.dof_configuration_space_robot = Parser.Results.dof_configuration_space_robot;
 Handler_IK_Model.dof_Task = Parser.Results.dof_Task;
     
 if Casadi

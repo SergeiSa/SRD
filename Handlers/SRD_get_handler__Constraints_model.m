@@ -2,7 +2,7 @@ function Handler_Constraints = SRD_get_handler__Constraints_model(varargin)
 Parser = inputParser;
 Parser.FunctionName = 'SRD_get_handler__Constraints_model';
 Parser.addOptional('description', []);
-Parser.addOptional('dof_robot', []);
+Parser.addOptional('dof_configuration_space_robot', []);
 % Parser.addOptional('dof_Constraint', []);
 Parser.parse(varargin{:});
 
@@ -17,7 +17,7 @@ end
 Handler_Constraints = SRDHandler_Constraints();
 Handler_Constraints.State.description = description;
 
-Handler_Constraints.dof_robot = Parser.Results.dof_robot;
+Handler_Constraints.dof_configuration_space_robot = Parser.Results.dof_configuration_space_robot;
 Handler_Constraints.dof_Constraint = description.dof_task;
 
     

@@ -3,7 +3,7 @@ classdef SRDHandler_StateSpace < SRDHandler
         x;
         dx;
         
-        dof_StateSpace;
+        dof_state_space_robot;
     end
     methods
         function obj = SRDHandler_StateSpace(varargin)
@@ -15,7 +15,7 @@ classdef SRDHandler_StateSpace < SRDHandler
             obj.x = reshape(Parser.Results.InitialState, [], 1);
             obj.dx = zeros(size(obj.x));
             
-            obj.dof_StateSpace = length(obj.x);
+            obj.dof_state_space_robot = length(obj.x);
         end
     end
 end

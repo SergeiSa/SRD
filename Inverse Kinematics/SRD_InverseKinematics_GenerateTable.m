@@ -15,7 +15,7 @@ Parser.addOptional('TimeTable', []);
 Parser.parse(varargin{:});
 
 Count = length(Parser.Results.TimeTable);
-dof = Parser.Results.Handler_IK_Model.dof_robot;
+dof = Parser.Results.Handler_IK_Model.dof_configuration_space_robot;
 
 IK_Table = zeros(Count, dof);
 q0 = Parser.Results.InitialGuess;

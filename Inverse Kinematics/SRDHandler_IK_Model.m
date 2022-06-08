@@ -4,7 +4,7 @@ classdef SRDHandler_IK_Model < SRDHandler
         get_Jacobian;
         get_Jacobian_derivative;
         
-        dof_robot;
+        dof_configuration_space_robot;
         dof_Task;
     end
     methods

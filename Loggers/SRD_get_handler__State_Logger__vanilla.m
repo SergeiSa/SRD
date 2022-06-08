@@ -11,12 +11,12 @@ Parser.parse(varargin{:});
 Handler_State_Logger_vanilla = SRDHandler_Logger;
 
 Handler_State_Logger_vanilla.Log.q = ...
-    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_robot);
+    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_configuration_space_robot);
 Handler_State_Logger_vanilla.Log.v = ...
-    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_robot);
+    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_configuration_space_robot);
 if Parser.Results.ToLogAcceleration
 Handler_State_Logger_vanilla.Log.a = ...
-    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_robot);
+    NaN(length(Parser.Results.Handler_Time.TimeLog), Parser.Results.Handler_State.dof_configuration_space_robot);
 end
 
 

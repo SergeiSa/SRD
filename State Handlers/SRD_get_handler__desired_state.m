@@ -7,7 +7,7 @@ Parser.parse(varargin{:});
 
 Handler_Desired_State = SRDHandler_Desired_State();
 
-Handler_Desired_State.dof_robot = Parser.Results.Handler_ControlInput.dof_robot;
+Handler_Desired_State.dof_configuration_space_robot = Parser.Results.Handler_ControlInput.dof_configuration_space_robot;
 
 Handler_Desired_State.Update = @() Update(Handler_Desired_State, ...
     Parser.Results.Handler_Time, ...

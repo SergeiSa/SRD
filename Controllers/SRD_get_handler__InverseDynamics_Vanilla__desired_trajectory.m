@@ -5,6 +5,7 @@ Parser.FunctionName = 'SRD_get_handler__InverseDynamics_Vanilla';
 Parser.addOptional('Handler_ControlInput', []);
 Parser.addOptional('Handler_dynamics_generalized_coordinates_model', []);
 Parser.addOptional('Handler_Time', []);
+Parser.addOptional('dof_control',  []);
 
 Parser.parse(varargin{:});
 
@@ -15,6 +16,8 @@ Handler_InverseDynamics.Update = @() Update(...
     Parser.Results.Handler_ControlInput, ...
     Parser.Results.Handler_dynamics_generalized_coordinates_model, ...
     Parser.Results.Handler_Time);
+
+Handler_InverseDynamics.dof_control = Parser.Results.Handler_dynamics_generalized_coordinates_model.dof_control;
 
 %implementing serialization for arbitrary cell arrays of handlers seems to
 %be more pain than it is worth

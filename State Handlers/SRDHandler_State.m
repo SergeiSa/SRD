@@ -5,7 +5,7 @@ classdef SRDHandler_State < SRDHandler
         a;
         Other;
         
-        dof_robot;
+        dof_configuration_space_robot;
     end
     methods
         function obj = SRDHandler_State(varargin)
@@ -19,7 +19,7 @@ classdef SRDHandler_State < SRDHandler
             obj.v = reshape(Parser.Results.InitialVelocity, [], 1);
             obj.a = NaN(size(obj.v));
             
-            obj.dof_robot = length(Parser.Results.InitialPosition);
+            obj.dof_configuration_space_robot = length(Parser.Results.InitialPosition);
         end
 
         function squized = get_position_velocity_acceleration(obj, ~)            

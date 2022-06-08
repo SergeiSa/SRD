@@ -4,8 +4,8 @@ classdef SRDHandler_StateConverter_StateSpace2GenCoord < SRDHandler
         v;
         a;
         
-        dof_robot;
-        dof_robot_StateSpace;
+        dof_configuration_space_robot;
+        dof_state_space_robot;
         
         Update;
     end
@@ -16,16 +16,16 @@ classdef SRDHandler_StateConverter_StateSpace2GenCoord < SRDHandler
             Parser.addOptional('Handler_StateSpace', []);
             Parser.parse(varargin{:});
             
-            obj.dof_robot = Parser.Results.Handler_StateSpace.dof_StateSpace / 2;
-            obj.dof_robot_StateSpace = Parser.Results.Handler_StateSpace.dof_StateSpace;
+            obj.dof_configuration_space_robot = Parser.Results.Handler_StateSpace.dof_state_space_robot / 2;
+            obj.dof_state_space_robot = Parser.Results.Handler_StateSpace.dof_state_space_robot;
             
             obj.Update = @() Update(obj, ...
                 Parser.Results.Handler_StateSpace);
             
             function Update(obj, Handler_StateSpace)
-                obj.q = Handler_StateSpace.x(1:obj.dof_robot);
-                obj.v = Handler_StateSpace.x ((obj.dof_robot + 1):end);
-                obj.a = Handler_StateSpace.dx((obj.dof_robot + 1):end);
+                obj.q = Handler_StateSpace.x(1:obj.dof_configuration_space_robot);
+                obj.v = Handler_StateSpace.x ((obj.dof_configuration_space_robot + 1):end);
+                obj.a = Handler_StateSpace.dx((obj.dof_configuration_space_robot + 1):end);
             end
         end
         

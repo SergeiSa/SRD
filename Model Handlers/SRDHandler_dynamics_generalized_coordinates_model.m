@@ -32,6 +32,10 @@ classdef SRDHandler_dynamics_generalized_coordinates_model < SRDHandler
         %velocities
         %u - control input
         %
+        function FirstOrderSystem_qv_handle = get_FirstOrderSystem_qv_handle(obj)
+            FirstOrderSystem_qv_handle = @(x, u) obj.get_FirstOrderSystem_qv(x, u);
+        end
+        
         function dx = get_FirstOrderSystem_qv(obj, x, u)
             q = x(1:obj.dof_configuration_space_robot);
             v = x((obj.dof_configuration_space_robot+1):end);

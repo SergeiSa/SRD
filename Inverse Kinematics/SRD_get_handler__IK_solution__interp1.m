@@ -29,7 +29,7 @@ Handler_IK_Solution.PreSerializationPrepFunction = @PreSerializationPrepFunction
         Handler_IK_Solution.State.Handler_IK_Model = SRD_get(Handler_IK_Model_name);
         Handler_IK_Solution.State.Handler_IK_task  = SRD_get(Handler_IK_task_name);
         
-        Handler_IK_Solution.dof_robot = Handler_IK_Solution.State.Handler_IK_Model.dof_robot;
+        Handler_IK_Solution.dof_configuration_space_robot = Handler_IK_Solution.State.Handler_IK_Model.dof_configuration_space_robot;
         
         Handler_IK_Solution.TimeStart      = max(Handler_IK_Solution.State.Handler_IK_Model.TimeStart, ...
                                                  Handler_IK_Solution.State.Handler_IK_task.TimeStart);
@@ -71,8 +71,8 @@ Handler_IK_Solution.get_position_velocity_acceleration = ...
         res = pinv([J,  zeros(size(J)); 
                     dJ, J]) * [task_v; task_a];
                     
-        v = res(1:Handler_IK_Solution.dof_robot); 
-        a = res((Handler_IK_Solution.dof_robot + 1):end);
+        v = res(1:Handler_IK_Solution.dof_configuration_space_robot); 
+        a = res((Handler_IK_Solution.dof_configuration_space_robot + 1):end);
         
         squized = [q, v, a];
     end

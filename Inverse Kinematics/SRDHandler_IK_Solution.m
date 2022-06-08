@@ -3,7 +3,7 @@ classdef SRDHandler_IK_Solution < SRDHandler
         get_position;
         get_position_velocity_acceleration;
         
-        dof_robot;
+        dof_configuration_space_robot;
     end
     methods
         function handle = get_position_handle(obj)

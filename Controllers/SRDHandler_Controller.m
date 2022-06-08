@@ -6,6 +6,9 @@ classdef SRDHandler_Controller < SRDHandler
         %stored, it is supposed to be used in application 
         u; 
         
+        %number of elements in u
+        dof_control;
+        
         %This function (same as other Update functions) should be called to
         %make teh controller process the availible information and generate
         %new value of u
