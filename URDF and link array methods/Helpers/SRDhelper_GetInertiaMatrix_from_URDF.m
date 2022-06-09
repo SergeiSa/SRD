@@ -1,4 +1,4 @@
-function [inertia_matrix] = UPH_GetMeshInfoFromLinkName(varargin)
+function [inertia_matrix] = SRDhelper_GetInertiaMatrix_from_URDF(varargin)
     Parser = inputParser;
     Parser.FunctionName = 'UPH_GetMeshPathFromLinkName';
     Parser.addOptional('LinkXMLNodes', []);
@@ -27,12 +27,12 @@ function [inertia_matrix] = UPH_GetMeshInfoFromLinkName(varargin)
 
             %TODO:check if node is NULL
 
-            inertial_node = UPH_FindXMLChildByName('XMLNode',link,'TagName','inertial');
+            inertial_node = SRDhelper_FindXMLChildByName('XMLNode',link,'TagName','inertial'); %UPH_FindXMLChildByName
             if isempty(inertial_node)
                 return;
             end
             
-            inertia_node = UPH_FindXMLChildByName('XMLNode',inertial_node,'TagName','inertia');
+            inertia_node = SRDhelper_FindXMLChildByName('XMLNode',inertial_node,'TagName','inertia'); %UPH_FindXMLChildByName
             
 
             if ~isempty(inertia_node)

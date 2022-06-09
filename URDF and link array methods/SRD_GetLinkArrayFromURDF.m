@@ -58,7 +58,7 @@ function result = SRD_GetLinkArrayFromURDF(varargin)
             end
         end
 
-        Inertia = UPH_GetInertiaMatrix('LinkXMLNodes', links,'LinkName',Name);
+        Inertia = SRDhelper_GetInertiaMatrix_from_URDF('LinkXMLNodes', links,'LinkName',Name); %UPH_GetInertiaMatrix
 
         RelativeFollower = [];
         RelativeBase = [0; 0; 0];
