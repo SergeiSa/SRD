@@ -3,8 +3,6 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         dof_configuration_space_robot;
         dof_control;
         
-        UsePinv;
-        
         last_update_q;
         last_update_v;
         
@@ -16,6 +14,12 @@ classdef SRDHandler_dynamics_GC_model_evaluator < SRDHandler
         joint_space_inertia_matrix_inverse;
         bias_vector;
         control_map;
+        
+        UsePinv;
+        
+        type = "memory reader"; 
+        %can be useful to distinguish between handlers that actually call functions to re-evaluate the model
+        %and handlers that only recall most resent model values from memory
     end
     methods
         

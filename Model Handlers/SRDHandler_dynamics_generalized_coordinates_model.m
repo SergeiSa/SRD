@@ -11,6 +11,10 @@ classdef SRDHandler_dynamics_generalized_coordinates_model < SRDHandler
         dof_control; %number of control inputs
         
         UsePinv; %if true - use pinv for matrix inversion, else use \
+        
+        type = "function caller"; 
+        %can be useful to distinguish between handlers that actually call functions to re-evaluate the model
+        %and handlers that only recall most resent model values from memory
     end
     methods
         
