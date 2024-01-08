@@ -102,20 +102,11 @@ classdef SRDHandler_Linear_model_finite_dif_constrained_implicit < SRDHandler
             
             N = null(G);
             P = N*N';
-            %P = eye(dof) - pinv(F)*F;
             
             delta_X = P * obj.finite_dif_step_x;
-
-%             delta_A_q = zeros(dof, dof);  %delta_A_q = A21 * delta_Q 
-%             delta_A_v = zeros(dof, dof);  %delta_A_v = A22 * delta_V
+            delta_U =     obj.finite_dif_step_u;
             
-            %delta_a = A*delta_x + delta_w
-            %delta_a - delta_w = A*delta_x
-            %aw = delta_a - delta_w
             a_array = zeros(n, n);
-            
-%             delta_B_u = zeros(dof, dof_ctrl);  
-
             for i = 1:n
                 xi = x + delta_X(:, i);
                 ai = obj.get_acceleration(xi, u);
@@ -124,17 +115,13 @@ classdef SRDHandler_Linear_model_finite_dif_constrained_implicit < SRDHandler
             obj.A = a_array * pinv(delta_X, obj.tol);
             
             
-            
-%             for i =1:dof_ctrl
-%                 ui=u+delta_U(:,i);
-%                 ai = obj.get_acceleration(q, v, ui);
-%                 delta_B_u(:, i) = ai - a;
-%             end
-%             B2 = delta_B_u * pinv(delta_U, obj.tol);
-
-            
-%             obj.B = [zeros(dof,dof_ctrl);
-%                     B2];
+            b_array = zeros(n, dof_ctrl);  
+            for j = 1:dof_ctrl
+                uj = u + delta_U(:, j);
+                aj = obj.get_acceleration(x, uj);
+                b_array(:, j) = aj - a;
+            end
+            obj.B = b_array * pinv(delta_U, obj.tol);
 
             obj.last_update_q = q;
             obj.last_update_v = v;
